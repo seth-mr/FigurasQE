@@ -1,0 +1,328 @@
+{
+  "info": {
+    "_postman_id": "dd8571d6-a6a6-443f-9a36-e1c82594a3d2",
+    "name": "FQE LogsService and Rabbit Listener",
+    "description": "Pruebas automatizadas para FQE.LogsService y FQE-RabbitMongoListener-Node. Incluye health, errores esperados, filtros y una prueba end-to-end generando un evento desde el gateway.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('seedSuffix')) {",
+          "  const suffix = Date.now().toString() + Math.floor(Math.random() * 10000).toString();",
+          "  pm.collectionVariables.set('seedSuffix', suffix);",
+          "  pm.collectionVariables.set('newLogStudentEmail', `newman.logs.${suffix}@mail.com`);",
+          "  pm.collectionVariables.set('newLogStudentPassword', 'StudentDemo123!');",
+          "}",
+          "if (!pm.collectionVariables.get('listenerLogRetry')) {",
+          "  pm.collectionVariables.set('listenerLogRetry', '0');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Listener Health - GET /health",
+      "request": {
+        "method": "GET",
+        "url": "{{listenerBaseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200 cuando esta sano', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Payload esperado del listener', function () {",
+              "  pm.expect(body.service).to.eql('rabbit-mongo-listener');",
+              "  pm.expect(body.status).to.eql('ok');",
+              "  pm.expect(body.rabbitmq).to.eql('ok');",
+              "  pm.expect(body.mongo).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listener Health - POST no permitido",
+      "request": {
+        "method": "POST",
+        "url": "{{listenerBaseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 405', function () {",
+              "  pm.response.to.have.status(405);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Mensaje de metodo no permitido', function () {",
+              "  pm.expect(body.message).to.eql('Method not allowed');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listener - ruta inexistente",
+      "request": {
+        "method": "GET",
+        "url": "{{listenerBaseUrl}}/not-found"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Mensaje not found', function () {",
+              "  pm.expect(body.message).to.eql('Not found');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs Health - GET /health",
+      "request": {
+        "method": "GET",
+        "url": "{{logsBaseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Payload esperado de logs service', function () {",
+              "  pm.expect(body.service).to.eql('logs');",
+              "  pm.expect(['ok', 'degraded']).to.include(body.status);",
+              "  pm.expect(['ok', 'error']).to.include(body.mongo);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs - listado general con limit",
+      "request": {
+        "method": "GET",
+        "url": "{{logsBaseUrl}}/api/logs?limit=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Respuesta es arreglo con maximo 3 items', function () {",
+              "  pm.expect(body).to.be.an('array');",
+              "  pm.expect(body.length).to.be.at.most(3);",
+              "});",
+              "if (body.length > 0) {",
+              "  pm.test('Cada log trae campos principales', function () {",
+              "    const item = body[0];",
+              "    pm.expect(item).to.have.property('service');",
+              "    pm.expect(item).to.have.property('route');",
+              "    pm.expect(item).to.have.property('statusCode');",
+              "    pm.expect(item).to.have.property('timestamp');",
+              "    pm.expect(item).to.have.property('action');",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs - servicio inexistente devuelve vacio",
+      "request": {
+        "method": "GET",
+        "url": "{{logsBaseUrl}}/api/logs/service/does-not-exist?limit=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Regresa arreglo vacio', function () {",
+              "  pm.expect(body).to.be.an('array');",
+              "  pm.expect(body.length).to.eql(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs - filtro auth-service login",
+      "request": {
+        "method": "GET",
+        "url": "{{logsBaseUrl}}/api/logs?service=auth-service&route=/auth/login&limit=5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Respuesta es arreglo', function () {",
+              "  pm.expect(body).to.be.an('array');",
+              "});",
+              "if (body.length > 0) {",
+              "  pm.test('Todos corresponden a auth-service y /auth/login', function () {",
+              "    body.forEach((item) => {",
+              "      pm.expect(item.service).to.eql('auth-service');",
+              "      pm.expect(item.route).to.include('/auth/login');",
+              "    });",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway trigger - register unique student",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman Logs Student\",\n  \"email\": \"{{newLogStudentEmail}}\",\n  \"password\": \"{{newLogStudentPassword}}\",\n  \"age\": 13,\n  \"gender\": \"F\",\n  \"country\": \"MX\",\n  \"role\": \"student\",\n  \"neurodivergency\": \"ninguna\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{gatewayBaseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Registro via gateway exitoso', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token y role student', function () {",
+              "  pm.expect(body.role).to.eql('student');",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "});",
+              "const parts = body.token.split('.');",
+              "const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));",
+              "pm.collectionVariables.set('newLogStudentId', payload.sub);",
+              "pm.collectionVariables.set('listenerLogRetry', '0');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify listener captured auth register event",
+      "request": {
+        "method": "GET",
+        "url": "{{logsBaseUrl}}/api/logs?service=auth-service&route=/auth/register&limit=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Consulta de logs responde 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "const expectedId = Number(pm.collectionVariables.get('newLogStudentId'));",
+              "const found = body.find((item) => Number(item.entityId) === expectedId && item.route === '/auth/register' && item.service === 'auth-service' && item.action === 'POST' && item.statusCode === 200);",
+              "if (found) {",
+              "  pm.test('El listener persiste el evento en Mongo y LogsService lo expone', function () {",
+              "    pm.expect(found.type).to.eql('success');",
+              "    pm.expect(found.entityType).to.eql('student');",
+              "  });",
+              "  pm.collectionVariables.set('listenerLogRetry', '0');",
+              "} else {",
+              "  const retry = Number(pm.collectionVariables.get('listenerLogRetry') || '0');",
+              "  if (retry < 5) {",
+              "    pm.collectionVariables.set('listenerLogRetry', String(retry + 1));",
+              "    postman.setNextRequest('Verify listener captured auth register event');",
+              "  } else {",
+              "    pm.test('El evento aparece en logs dentro de los reintentos', function () {",
+              "      pm.expect.fail(`No se encontro el evento del estudiante ${expectedId} despues de ${retry + 1} intentos`);",
+              "    });",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "seedSuffix",
+      "value": ""
+    },
+    {
+      "key": "newLogStudentEmail",
+      "value": ""
+    },
+    {
+      "key": "newLogStudentPassword",
+      "value": ""
+    },
+    {
+      "key": "newLogStudentId",
+      "value": ""
+    },
+    {
+      "key": "listenerLogRetry",
+      "value": "0"
+    }
+  ]
+}

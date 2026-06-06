@@ -1,0 +1,28 @@
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fqe-auth-service
+    restart: unless-stopped
+    ports:
+      - "5041:5041"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5041
+      ConnectionStrings__DefaultConnection: Host=host.docker.internal;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+      Jwt__Issuer: figurasqe-auth
+      Jwt__Audience: figurasqe-client
+      Jwt__Secret: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+      Jwt__ExpirationMinutes: 10080
+      Service__Port: 5041
+      Service__Endpoints__Frontend: http://host.docker.internal:5028
+      Service__Endpoints__MicroservicioFiguras: http://host.docker.internal:5124
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:5041/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 20s

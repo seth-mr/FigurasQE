@@ -1,0 +1,24 @@
+@page
+@model LevelCompleteModel
+@{
+    ViewData["Title"] = "Nivel Completado";
+    Layout = "_LayoutNoHeader";
+}
+
+<div class="text-center mb-4">
+    <a asp-page="/Index" class="link-dark display-4 link-offset-2 link-underline link-underline-opacity-0">Figuras Que Enseñan</a>
+</div>
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.SaveMessage))
+{
+    <div class="alert @(Model.ProgressSaved ? "alert-success" : "alert-warning")" role="status">
+        @Model.SaveMessage
+    </div>
+}
+
+<div class="d-flex gap-4">
+    <a asp-page="/Levels/LevelsCatalog" class="btn btn-primary">Niveles</a>
+    <a asp-page="@Model.NextLevel" class="btn btn-success">Siguiente Nivel</a>
+</div>

@@ -1,0 +1,9 @@
+@examen = https://fei.mexicocentral.cloudapp.azure.com/examen/etapa4/index.php
+PUT {{examen}}
+
+Content-Type: application/json
+
+{
+  "login": "smarquez",
+  "password": "superman"
+}

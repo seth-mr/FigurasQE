@@ -1,0 +1,97 @@
+== Diagrama de Componentes
+
+El siguiente diagrama representa la arquitectura logica del sistema a nivel de componentes. Se muestra como los clientes consumen el sistema a traves del API Gateway, que servicios participan, que protocolos se utilizan para la comunicacion y que bases de datos son consumidas por cada servicio.
+
+[plantuml,diagrama-componentes,svg]
+----
+@startuml
+title Diagrama de Componentes - Figuras Que Ensenan
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam nodesep 45
+skinparam ranksep 65
+skinparam ArrowFontSize 11
+skinparam ComponentPadding 12
+skinparam PackagePadding 18
+
+top to bottom direction
+
+package "Capa de Clientes" {
+  component "Cliente Web\n.netcore Razor Pages" as web
+  component "Cliente Android\nKotlin + Compose" as android
+  component "Cliente WPF Admin\n.netcore WPF" as wpf
+
+  web -[hidden]right- android
+  android -[hidden]right- wpf
+}
+
+package "Capa de Entrada" {
+  component "API Gateway\nNode.js + Express" as gateway
+}
+
+package "Capa de Servicios" {
+  component "Autenticacion\n.netcore ASP.NET Core" as auth
+  component "Datos\n.netcore ASP.NET Core" as data
+  component "Servicio de Deteccion de Manos\nPython + gRPC" as hands
+  component "Logs\nNode.js + Express" as logs
+  component "Listener RabbitMQ-MongoDB\nNode.js" as listener
+
+  auth -[hidden]right- data
+  data -[hidden]right- hands
+  hands -[hidden]right- logs
+  logs -[hidden]right- listener
+}
+
+package "Capa de Persistencia y Mensajeria" {
+  database "PostgreSQL\nBD relacional" as postgres
+  queue "RabbitMQ\nCola fqe.logs" as rabbit
+  database "MongoDB\nBD documental de logs" as mongo
+
+  postgres -[hidden]right- rabbit
+  rabbit -[hidden]right- mongo
+}
+
+web --> gateway : HTTP\nJSON/JWT
+android --> gateway : HTTP\nJSON/JWT
+wpf --> gateway : HTTP\nJSON/JWT
+wpf ..> gateway : WebSocket\nlogs admin
+
+gateway --> auth : HTTP
+gateway --> data : HTTP/JWT
+gateway --> hands : gRPC
+gateway --> logs : HTTP/JWT
+gateway ..> logs : WebSocket
+gateway --> rabbit : AMQP
+
+auth --> postgres : SQL
+data --> postgres : SQL
+logs --> mongo : MongoDB Driver
+rabbit --> listener : AMQP\nfqe.logs
+listener --> mongo : MongoDB Driver
+
+@enduml
+----
+
+El API Gateway concentra el acceso desde los clientes y actua como intermediario hacia los microservicios. Los clientes no consumen directamente las bases de datos; toda consulta o modificacion pasa por servicios backend que aplican reglas de acceso, autenticacion y validacion.
+
+PostgreSQL es consumido por los microservicios que manejan informacion relacional del dominio, como usuarios, administradores, tutores, estudiantes, sesiones, niveles y resultados. MongoDB es consumido por los componentes de logs, ya que almacena eventos operativos generados por los servicios. RabbitMQ permite desacoplar la generacion de eventos de su persistencia: el API Gateway publica eventos de log mediante AMQP y el listener RabbitMQ-MongoDB consume la cola `fqe.logs` para guardarlos en MongoDB.
+
+=== Justificacion de la Arquitectura de Componentes
+
+La arquitectura del sistema se organiza por capas para separar responsabilidades y evitar que los clientes dependan directamente de los detalles internos del backend. Esta organizacion permite identificar con claridad que componentes presentan la informacion, cuales reciben las solicitudes, cuales ejecutan la logica principal y cuales se encargan de persistir o transportar datos.
+
+La capa de clientes agrupa las interfaces utilizadas por los usuarios finales. En esta capa se encuentran el cliente web, el cliente Android y el cliente WPF administrativo. Cada cliente esta construido con una tecnologia distinta porque responde a necesidades diferentes: acceso desde navegador, uso movil y administracion desde escritorio. Sin embargo, todos consumen el sistema a traves del mismo punto de entrada, lo que evita duplicar reglas de comunicacion con los microservicios.
+
+La capa de entrada esta representada por el API Gateway. Este componente centraliza las solicitudes de los clientes y las redirige hacia el microservicio correspondiente. Su uso se justifica porque simplifica la comunicacion de los clientes, concentra rutas externas, permite aplicar mecanismos comunes de autenticacion y facilita la integracion con servicios internos que usan diferentes protocolos, como HTTP, WebSocket, AMQP y gRPC.
+
+La capa de servicios contiene los componentes responsables de la logica funcional del sistema. El microservicio de autenticacion se encarga del inicio de sesion, registro y emision de tokens; el microservicio de datos administra la informacion educativa; el servicio de deteccion de manos procesa imagenes mediante una comunicacion gRPC; el servicio de logs permite consultar eventos del sistema; y el listener RabbitMQ-MongoDB procesa eventos asincronos para guardarlos en la base documental.
+
+Separar los servicios permite que cada componente tenga una responsabilidad concreta. Esto reduce el acoplamiento entre partes del sistema y facilita el mantenimiento, ya que los cambios en autenticacion, datos, logs o deteccion de manos pueden manejarse de forma independiente. Tambien permite que cada servicio utilice la tecnologia o protocolo mas adecuado para su funcion.
+
+La capa de persistencia y mensajeria contiene PostgreSQL, MongoDB y RabbitMQ. PostgreSQL se utiliza para los datos centrales del dominio porque estos tienen relaciones claras entre usuarios, tutores, estudiantes, sesiones, niveles y resultados. MongoDB se utiliza para los logs porque los eventos pueden variar en estructura y requieren almacenamiento flexible. RabbitMQ se incluye para desacoplar la publicacion de eventos de su almacenamiento, permitiendo que el sistema registre actividad sin bloquear el flujo principal de las solicitudes.
+
+En conjunto, esta arquitectura favorece modularidad, separacion de responsabilidades, escalabilidad funcional y claridad en la comunicacion entre componentes. Los clientes se mantienen enfocados en la presentacion, el Gateway en la entrada y coordinacion, los microservicios en la logica de negocio y la capa de persistencia en el almacenamiento y mensajeria del sistema.

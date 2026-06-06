@@ -1,0 +1,156 @@
+<UserControl x:Class="FQE.AdminClient.Views.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="Transparent">
+    <Grid Margin="28">
+        <Border Padding="32"
+                Background="{StaticResource PanelBrush}"
+                CornerRadius="28">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+                    <TextBlock x:Name="WelcomeTitleText"
+                               FontSize="30"
+                               FontWeight="Bold"
+                               Text="Bienvenido" />
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Margin="0,30,0,0"
+                        Padding="22"
+                        Background="{StaticResource PanelBrushAlt}"
+                        CornerRadius="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Mi cuenta"
+                                       FontSize="22"
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="AccountSummaryText"
+                                       Margin="0,10,0,0"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="Accede a tu informacion personal" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Width="170"
+                                Content="Ver mi cuenta"
+                                Click="OpenAccountButton_Click" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Margin="0,24,0,0"
+                        Padding="22"
+                        Background="#16000000"
+                        CornerRadius="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Logs del sistema"
+                                       FontSize="22"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,10,0,0"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="Consulta los logs de los diferenmtesmicroservicios en tiempo real" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Width="170"
+                                Content="Ver logs"
+                                Click="OpenLogsButton_Click" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3"
+                        Margin="0,24,0,0"
+                        Padding="22"
+                        Background="#0F1D2C"
+                        CornerRadius="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Monitoreo de servicios"
+                                       FontSize="22"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,10,0,0"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="acciones para el control y gestion de los microservicios" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Width="190"
+                                Content="Monitorear servicios"
+                                Click="OpenServiceMonitorButton_Click" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="4"
+                        Margin="0,24,0,0"
+                        Padding="22"
+                        Background="#16000000"
+                        CornerRadius="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Estadisticas"
+                                       FontSize="22"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,10,0,0"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="resumen con metricas y estadisticas de operacion" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Width="210"
+                                Content="Consultar estadisticas"
+                                ToolTip="Abre el panel de estadisticas"
+                                Click="OpenStatisticsButton_Click" />
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="5"
+                            Margin="0,22,0,0"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Width="140"
+                            Content="Cerrar sesion"
+                            Background="#2A4058"
+                            Foreground="{StaticResource TextBrush}"
+                            Click="LogoutButton_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

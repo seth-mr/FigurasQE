@@ -1,0 +1,37 @@
+= Documentacion del Proyecto Figuras Que Ensenan
+:author: Equipo de desarrollo
+:revdate: 2026-05-21
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+:experimental:
+
+// Documento principal.
+// Cada seccion vive en un archivo independiente dentro de la carpeta secciones.
+
+include::secciones/01-introduccion.adoc[]
+
+include::secciones/05-requisitos-globales.adoc[]
+
+include::secciones/03-casos-uso.adoc[]
+
+include::secciones/14-microservicios.adoc[]
+
+include::secciones/15-clientes.adoc[]
+
+include::secciones/16-diagrama-componentes.adoc[]
+
+include::secciones/17-diagrama-despliegue-docker.adoc[]
+
+include::secciones/12-persistencia-datos.adoc[]
+
+include::secciones/13-rabbitmq.adoc[]
+
+include::secciones/18-jwt-autenticacion-autorizacion.adoc[]
+
+include::secciones/19-pruebas-newman.adoc[]
+
+include::secciones/20-pruebas-jmeter.adoc[]

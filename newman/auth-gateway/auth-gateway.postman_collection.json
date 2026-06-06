@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "f2a07ee5-173c-4867-b63b-57a6db4d52e4",
+    "name": "FQE Auth via Gateway",
+    "description": "Pruebas automatizadas del Auth Service accediendo a traves del gateway. Cubre validaciones, nulos, errores esperados y casos felices.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('seedSuffix')) {",
+          "  const suffix = Date.now().toString() + Math.floor(Math.random() * 10000).toString();",
+          "  pm.collectionVariables.set('seedSuffix', suffix);",
+          "  pm.collectionVariables.set('newStudentEmail', `newman.student.${suffix}@mail.com`);",
+          "  pm.collectionVariables.set('newTutorEmail', `newman.tutor.${suffix}@mail.com`);",
+          "  pm.collectionVariables.set('newStudentPassword', 'StudentDemo123!');",
+          "  pm.collectionVariables.set('newTutorPassword', 'TutorDemo123!');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Login - body vacio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Regresa envelope de error del gateway', function () {",
+              "  pm.expect(body.message).to.eql('Authentication Service Error');",
+              "  pm.expect(body.errors).to.be.an('object');",
+              "});",
+              "pm.test('Valida email y password requeridos', function () {",
+              "  pm.expect(body.errors).to.have.property('Email');",
+              "  pm.expect(body.errors).to.have.property('Password');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - email y password null",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": null,\n  \"password\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400 para nulos', function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - password incorrecto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{existingStudentEmail}}\",\n  \"password\": \"wrongpass123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 401', function () {",
+              "  pm.response.to.have.status(401);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Mensaje esperado', function () {",
+              "  pm.expect(body.message).to.eql('Invalid credentials');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - estudiante existente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{existingStudentEmail}}\",\n  \"password\": \"{{existingStudentPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token y role student', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('student');",
+              "  pm.expect(body.admin).to.eql(null);",
+              "});",
+              "pm.collectionVariables.set('studentToken', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - tutor existente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{existingTutorEmail}}\",\n  \"password\": \"{{existingTutorPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token y role tutor', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('tutor');",
+              "  pm.expect(body.admin).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Login - body vacio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/admin/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Valida Email y Password', function () {",
+              "  pm.expect(body.errors).to.have.property('Email');",
+              "  pm.expect(body.errors).to.have.property('Password');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Login - exito",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/admin/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token de admin y objeto admin', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('admin');",
+              "  pm.expect(body.admin).to.be.an('object');",
+              "  pm.expect(body.admin.email).to.eql(pm.environment.get('adminEmail'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register - body vacio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Valida campos requeridos principales', function () {",
+              "  pm.expect(body.errors).to.have.property('Name');",
+              "  pm.expect(body.errors).to.have.property('Email');",
+              "  pm.expect(body.errors).to.have.property('Password');",
+              "  pm.expect(body.errors).to.have.property('Age');",
+              "  pm.expect(body.errors).to.have.property('Gender');",
+              "  pm.expect(body.errors).to.have.property('Country');",
+              "  pm.expect(body.errors).to.have.property('Role');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register - valores null",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": null,\n  \"email\": null,\n  \"password\": null,\n  \"age\": null,\n  \"gender\": null,\n  \"country\": null,\n  \"role\": null,\n  \"neurodivergency\": null,\n  \"degree\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400 para nulls', function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register - estudiante nuevo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman Student\",\n  \"email\": \"{{newStudentEmail}}\",\n  \"password\": \"{{newStudentPassword}}\",\n  \"age\": 14,\n  \"gender\": \"F\",\n  \"country\": \"MX\",\n  \"role\": \"student\",\n  \"neurodivergency\": \"ninguna\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Registra estudiante con 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token y role student', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('student');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - estudiante recien registrado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newStudentEmail}}\",\n  \"password\": \"{{newStudentPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login del nuevo estudiante funciona', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Role sigue siendo student', function () {",
+              "  pm.expect(body.role).to.eql('student');",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register - tutor nuevo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman Tutor\",\n  \"email\": \"{{newTutorEmail}}\",\n  \"password\": \"{{newTutorPassword}}\",\n  \"age\": 39,\n  \"gender\": \"M\",\n  \"country\": \"MX\",\n  \"role\": \"tutor\",\n  \"degree\": \"maestria\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Registra tutor con 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega token y role tutor', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('tutor');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - tutor recien registrado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newTutorEmail}}\",\n  \"password\": \"{{newTutorPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login del nuevo tutor funciona', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Role sigue siendo tutor', function () {",
+              "  pm.expect(body.role).to.eql('tutor');",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "seedSuffix",
+      "value": ""
+    },
+    {
+      "key": "studentToken",
+      "value": ""
+    },
+    {
+      "key": "newStudentEmail",
+      "value": ""
+    },
+    {
+      "key": "newStudentPassword",
+      "value": ""
+    },
+    {
+      "key": "newTutorEmail",
+      "value": ""
+    },
+    {
+      "key": "newTutorPassword",
+      "value": ""
+    }
+  ]
+}

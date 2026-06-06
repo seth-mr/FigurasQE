@@ -1,0 +1,179 @@
+== Diagrama de Despliegue Docker
+
+Esta vista muestra el despliegue local del sistema usando Docker Desktop en Windows. Los contenedores se ejecutan de forma independiente y publican puertos hacia la maquina host. Como los servicios se levantan desde distintos `docker-compose.yml`, la comunicacion entre contenedores usa `host.docker.internal` y los puertos publicados en Windows.
+
+=== Puertos Publicados por Contenedor
+
+[cols="1,2,2,3", options="header"]
+|===
+| Contenedor
+| Puerto en Windows
+| Puerto interno
+| Funcion
+
+| `fqe-gateway`
+| `3000`
+| `3000`
+| Punto de entrada HTTP para clientes web, Android y WPF.
+
+| `fqe-auth-service`
+| `5041`
+| `5041`
+| Servicio de autenticacion y emision de JWT.
+
+| `fqe-microservicio-figuras`
+| `5124`
+| `5124`
+| Servicio principal de datos educativos.
+
+| `fqe-logs-service`
+| `5186`
+| `5186`
+| Consulta de logs por HTTP y WebSocket.
+
+| `fqe-rabbitmongo-listener`
+| `5190`, `5191`
+| `5190`, `5191`
+| Worker de RabbitMQ a MongoDB y endpoint tecnico de salud.
+
+| `fqe-hands-detection`
+| `50051`
+| `50051`
+| Servicio gRPC de deteccion de manos.
+
+| `postgres-db`
+| `5432`
+| `5432`
+| Base de datos relacional PostgreSQL.
+
+| `mongo-logs`
+| `27017`
+| `27017`
+| Base de datos documental para logs.
+
+| `rabbitmq`
+| `5672`, `15672`
+| `5672`, `15672`
+| Mensajeria AMQP y consola de administracion RabbitMQ.
+|===
+
+=== Diagrama de Despliegue
+
+[plantuml,diagrama-despliegue-docker,png]
+----
+@startuml
+title Diagrama de Despliegue Docker - Figuras Que Ensenan
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam defaultFontName Arial
+skinparam nodesep 80
+skinparam ranksep 95
+skinparam ArrowFontSize 10
+skinparam RectangleFontSize 11
+skinparam DatabaseFontSize 11
+skinparam QueueFontSize 11
+skinparam wrapWidth 180
+skinparam maxMessageSize 80
+
+top to bottom direction
+
+actor "Clientes\nWeb / Android / WPF" as clients
+
+node "Windows Host\nDocker Desktop" as host {
+  rectangle "Capa de entrada" as entry {
+    rectangle "fqe-gateway\nHTTP 3000:3000" as gateway
+  }
+
+  rectangle "Servicios de aplicacion" as app {
+    rectangle "fqe-auth-service\nHTTP 5041:5041" as auth
+    rectangle "fqe-microservicio-figuras\nHTTP 5124:5124" as data
+    rectangle "fqe-logs-service\nHTTP/WS 5186:5186" as logs
+    rectangle "fqe-hands-detection\ngRPC 50051:50051\nhealth interno 8080" as hands
+  }
+
+  rectangle "Mensajeria y worker" as async {
+    queue "rabbitmq\nAMQP 5672:5672\nManagement 15672:15672" as rabbit
+    rectangle "fqe-rabbitmongo-listener\nHTTP 5190:5190\nTCP 5191:5191" as listener
+  }
+
+  rectangle "Persistencia" as storage {
+    database "postgres-db\nPostgreSQL 5432:5432" as postgres
+    database "mongo-logs\nMongoDB 27017:27017" as mongo
+  }
+}
+
+clients -down-> gateway : HTTP localhost:3000
+
+gateway -down-> auth : HTTP 5041
+gateway -down-> data : HTTP/JWT 5124
+gateway -down-> logs : HTTP/WS 5186
+gateway -down-> hands : gRPC 50051
+gateway -down-> rabbit : AMQP 5672
+
+auth -down-> postgres : SQL 5432
+data -down-> postgres : SQL 5432
+logs -down-> mongo : MongoDB 27017
+rabbit -right-> listener : Cola fqe.logs
+listener -down-> mongo : MongoDB 27017
+
+@enduml
+----
+
+=== Acceso a Servicios
+
+La siguiente tabla resume como se accede a cada componente desde Windows y como se referencia desde otros contenedores Docker. En este despliegue, los contenedores se comunican usando `host.docker.internal` porque los servicios estan publicados hacia el host.
+
+[cols="1,2,2,2", options="header"]
+|===
+| Servicio o contenedor
+| Acceso desde Windows
+| Acceso desde Docker
+| Uso principal
+
+| `fqe-gateway`
+| `http://localhost:3000`
+| `http://host.docker.internal:3000`
+| Punto de entrada para clientes web, Android y WPF.
+
+| `fqe-auth-service`
+| `http://localhost:5041`
+| `http://host.docker.internal:5041`
+| Autenticacion, registro y emision de JWT.
+
+| `fqe-microservicio-figuras`
+| `http://localhost:5124`
+| `http://host.docker.internal:5124`
+| Datos educativos: estudiantes, tutores, sesiones, niveles y resultados.
+
+| `fqe-logs-service`
+| `http://localhost:5186`
+| `http://host.docker.internal:5186`
+| Consulta de logs y canal WebSocket de eventos.
+
+| `fqe-rabbitmongo-listener`
+| `http://localhost:5190`
+| `http://host.docker.internal:5190`
+| Monitoreo del worker que consume RabbitMQ y persiste eventos en MongoDB.
+
+| `fqe-hands-detection`
+| `localhost:50051`
+| `host.docker.internal:50051`
+| Servicio gRPC usado por el Gateway para deteccion de manos.
+
+| `postgres-db`
+| `localhost:5432`
+| `host.docker.internal:5432`
+| Base de datos relacional PostgreSQL.
+
+| `mongo-logs`
+| `localhost:27017`
+| `host.docker.internal:27017`
+| Base de datos documental para logs.
+
+| `rabbitmq`
+| `amqp://localhost:5672` y `http://localhost:15672`
+| `amqp://host.docker.internal:5672`
+| Mensajeria AMQP y consola de administracion RabbitMQ.
+|===

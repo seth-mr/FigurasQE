@@ -1,0 +1,161 @@
+@page
+@model DetailModel
+@{
+    ViewData["Title"] = "Mi perfil";
+    Layout = "_LayoutNoHeader";
+}
+
+<section class="student-detail-page">
+    <div class="detail-topbar">
+        <a asp-page="/Student/Home" class="btn btn-outline-dark">Volver</a>
+        <h1>Mi perfil</h1>
+        <a asp-page="/Student/Profile" class="btn btn-success">Editar datos</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Student.IdStudent == 0)
+    {
+        <article class="panel-card empty-state">
+            <h2>No se pudo cargar tu perfil.</h2>
+            <p>Regresa al panel e intenta abrirlo de nuevo.</p>
+        </article>
+    }
+    else
+    {
+        <div class="tab-row">
+            <a asp-page="/Student/Detail" asp-route-tab="datos" asp-route-filter="@Model.Filter"
+               class="tab-link @(Model.Tab == "datos" ? "active" : "")">Datos</a>
+            <a asp-page="/Student/Detail" asp-route-tab="sesiones" asp-route-filter="@Model.Filter"
+               class="tab-link @(Model.Tab == "sesiones" ? "active" : "")">Sesiones</a>
+        </div>
+
+        <article class="student-hero-card @Model.GetStudentCardClass()">
+            <h2>@(string.IsNullOrWhiteSpace(Model.Student.Name) ? "Estudiante" : Model.Student.Name)</h2>
+            <div class="chips">
+                @if (Model.Tab == "datos")
+                {
+                    <span class="chip">Edad @Model.Student.Age</span>
+                    <span class="chip">@Model.FormatCountry(Model.Student.Country)</span>
+                    <span class="chip">@(Model.IsNeurodivergent() ? "Neurodivergente" : "No neurodivergente")</span>
+                }
+                else
+                {
+                    <span class="chip">@Model.FilteredSessions.Count sesiones</span>
+                    <span class="chip">@Model.PlayedLevelsCount() niveles jugados</span>
+                    <span class="chip">@Model.FormatTotalPlayedTime()</span>
+                    <span class="chip">@Model.CompletionPercentage()% completado</span>
+                }
+            </div>
+        </article>
+
+        @if (Model.Tab == "datos")
+        {
+            <div class="detail-grid">
+                <article class="panel-card">
+                    <p class="eyebrow">Datos personales</p>
+                    <dl class="summary-list">
+                        <div>
+                            <dt>Email</dt>
+                            <dd>@(Model.Student.Email ?? "No disponible")</dd>
+                        </div>
+                        <div>
+                            <dt>Género</dt>
+                            <dd>@Model.FormatGender(Model.Student.Gender)</dd>
+                        </div>
+                        <div>
+                            <dt>País</dt>
+                            <dd>@Model.FormatCountry(Model.Student.Country)</dd>
+                        </div>
+                        <div>
+                            <dt>Fecha de registro</dt>
+                            <dd>@Model.FormatDate(Model.Student.RegistrationDate)</dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <article class="panel-card">
+                    <p class="eyebrow">Acompañamiento</p>
+                    <dl class="summary-list">
+                        <div>
+                            <dt>Neurodivergencia</dt>
+                            <dd>@Model.NeurodivergencyText()</dd>
+                        </div>
+                        <div>
+                            <dt>Tutor asignado</dt>
+                            <dd>@(Model.Student.Tutor?.Name ?? "No disponible")</dd>
+                        </div>
+                        <div>
+                            <dt>Email del tutor</dt>
+                            <dd>@(Model.Student.Tutor?.Email ?? "No disponible")</dd>
+                        </div>
+                    </dl>
+                </article>
+            </div>
+        }
+        else
+        {
+            <article class="panel-card session-filter-card">
+                <p class="eyebrow">Filtrar sesiones</p>
+                <div class="filter-row">
+                    @foreach (var filter in Model.SessionFilters)
+                    {
+                        <a asp-page="/Student/Detail" asp-route-tab="sesiones" asp-route-filter="@filter.Value"
+                           class="filter-chip @(Model.Filter == filter.Value ? "active" : "")">@filter.Label</a>
+                    }
+                </div>
+            </article>
+
+            @if (Model.Sessions.Count == 0)
+            {
+                <article class="panel-card empty-state">
+                    <h2>Aún no hay sesiones registradas.</h2>
+                    <p>Cuando juegues, aquí aparecerá tu historial con fecha, niveles jugados y duración.</p>
+                </article>
+            }
+            else if (Model.FilteredSessions.Count == 0)
+            {
+                <article class="panel-card empty-state">
+                    <h2>No hay sesiones en este rango.</h2>
+                    <p>Prueba con otro filtro para ver más actividad.</p>
+                </article>
+            }
+            else
+            {
+                <div class="session-list">
+                    @foreach (var session in Model.FilteredSessions)
+                    {
+                        var sessionNumber = Model.Sessions.Count - Model.Sessions.FindIndex(item => item.IdSession == session.IdSession);
+                        <details class="session-card">
+                            <summary>
+                                <span>
+                                    <strong>@Model.FormatDate(session.BeginningDate)</strong>
+                                    <small>Sesión #@sessionNumber</small>
+                                </span>
+                                <span class="chips">
+                                    <span class="chip">Inicio @(session.BeginningDate?.ToString("HH:mm") ?? "sin hora")</span>
+                                    <span class="chip">@session.LevelResults.Count niveles</span>
+                                    <span class="chip">@Model.FormatDuration(session)</span>
+                                </span>
+                            </summary>
+                            <div class="session-detail">
+                                <p><strong>Inicio:</strong> @Model.FormatDate(session.BeginningDate)</p>
+                                <p><strong>Fin:</strong> @Model.FormatEndDate(session.EndDate)</p>
+                                <p><strong>Duración:</strong> @Model.FormatDuration(session)</p>
+                                <p><strong>Niveles jugados:</strong> @session.LevelResults.Count</p>
+                                <p><strong>Niveles completados:</strong> @session.LevelResults.Count(result => result.Completed == true)</p>
+                                @if (!string.IsNullOrWhiteSpace(session.Device))
+                                {
+                                    <p><strong>Dispositivo:</strong> @session.Device</p>
+                                }
+                            </div>
+                        </details>
+                    }
+                </div>
+            }
+        }
+    }
+</section>

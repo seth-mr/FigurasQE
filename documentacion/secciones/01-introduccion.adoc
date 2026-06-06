@@ -1,0 +1,32 @@
+== Introduccion
+
+Figuras Que Ensenan es una aplicacion educativa interactiva disenada para que ninas y ninos, especialmente en edades tempranas, aprendan conceptos matematicos de forma natural, intuitiva y divertida. Su interes principal es transformar el aprendizaje en una experiencia activa: el estudiante no solo ve ejercicios en pantalla, sino que participa mediante el movimiento, la interaccion y la resolucion de retos dentro de una narrativa ludica.
+
+El proyecto combina recursos pedagogicos, tecnologia e interaccion digital para apoyar el aprendizaje de la suma. Una de sus ideas centrales es permitir que el nino utilice sus dedos como parte del proceso de aprendizaje, acercando la actividad a una experiencia concreta y corporal. Esta propuesta se relaciona con el enfoque CPA del metodo Singapur, donde el estudiante primero manipula o representa elementos concretos, despues interpreta una representacion visual y finalmente comprende la relacion abstracta entre cantidades y operaciones.
+
+Desde la perspectiva del estudiante, la aplicacion busca que aprender no se sienta como una actividad rigida o repetitiva. La narrativa, los niveles, las sesiones de uso y los resultados permiten construir una experiencia mas cercana al juego, donde cada avance puede registrarse y convertirse en informacion util para dar seguimiento a su progreso. El objetivo no es solamente resolver sumas, sino favorecer la motivacion, la confianza y la participacion activa del nino durante su proceso de aprendizaje.
+
+Sin embargo, Figuras Que Ensenan no esta pensada unicamente como una aplicacion para ninos. Tambien incorpora funciones para las personas que acompanian su desarrollo. Los tutores, profesores o padres pueden consultar informacion de los estudiantes asociados a su cuenta, revisar sesiones registradas, analizar resultados por nivel y dar seguimiento al avance de varios ninos desde una misma plataforma. Esto permite que el acompanamiento no dependa solo de la supervision directa, sino tambien de datos generados durante el uso real de la aplicacion.
+
+El sistema tambien considera un perfil administrativo. El administrador cuenta con herramientas para obtener estadisticas generales sobre estudiantes, tutores, registros, actividad, horas jugadas y niveles superados. Ademas, el cliente administrativo permite consultar logs y monitorear servicios, lo que ayuda a tener una vision mas completa tanto del uso educativo como del estado tecnico de la plataforma.
+
+A nivel tecnico, el proyecto esta organizado como un ecosistema de aplicaciones y servicios. Incluye clientes web, Android y WPF; un servicio de autenticacion con roles para estudiantes, tutores y administradores; un gateway para centralizar la comunicacion; microservicios para gestionar estudiantes, tutores, sesiones, niveles y resultados; y componentes de mensajeria y almacenamiento de logs mediante RabbitMQ y MongoDB. Esta arquitectura permite separar responsabilidades, controlar el acceso a la informacion y facilitar el crecimiento del sistema.
+
+En conjunto, Figuras Que Ensenan busca resolver la necesidad de una herramienta educativa que no solo ayude al nino a aprender de manera mas visual, interactiva y significativa, sino que tambien ofrezca a profesores, padres y administradores informacion clara para acompanarlo, evaluar su progreso y tomar mejores decisiones sobre su proceso de aprendizaje.
+
+=== Publico Objetivo
+
+El proyecto esta dirigido principalmente a:
+
+* Ninas y ninos que utilizan la aplicacion para practicar y reforzar aprendizajes matematicos.
+* Profesores o tutores que acompanian el avance de uno o varios estudiantes.
+* Padres o responsables que desean consultar el progreso de sus hijos.
+* Administradores que supervisan estadisticas, actividad, logs y estado general de los servicios.
+
+=== Enfoque del Proyecto
+
+La propuesta de Figuras Que Ensenan se apoya en tres ideas principales:
+
+* Aprendizaje interactivo, usando actividades visuales, movimiento y retroalimentacion.
+* Seguimiento educativo, registrando sesiones, niveles y resultados para consultar el progreso.
+* Administracion y monitoreo, permitiendo analizar estadisticas y revisar el comportamiento del sistema.

@@ -1,0 +1,303 @@
+== RabbitMQ
+
+RabbitMQ se utiliza en el proyecto como mecanismo de mensajeria para transportar eventos importantes generados por el sistema. Su uso principal actualmente esta relacionado con el registro de logs: el gateway publica eventos en una cola y un servicio listener los consume para almacenarlos en MongoDB.
+
+=== Montaje en Docker
+
+RabbitMQ se ejecuta en un contenedor Docker llamado `rabbitmq`, usando la imagen `rabbitmq:3-management`.
+
+[cols="1,2", options="header"]
+|===
+| Elemento
+| Valor
+
+| Contenedor
+| `rabbitmq`
+
+| Imagen
+| `rabbitmq:3-management`
+
+| Puerto AMQP
+| `5672`
+
+| Puerto de administracion web
+| `15672`
+
+| Virtual host
+| `/`
+
+| Usuario por defecto
+| `guest`
+|===
+
+El puerto `5672` se utiliza para la comunicacion AMQP entre servicios. El puerto `15672` permite acceder a la consola web de administracion de RabbitMQ.
+
+=== Cola Principal del Proyecto
+
+La cola utilizada por el flujo de logs del proyecto es:
+
+[source,text]
+----
+fqe.logs
+----
+
+Esta cola se encuentra declarada como durable, por lo que RabbitMQ conserva su definicion aunque el contenedor o el broker se reinicien. En el estado revisado, la cola existe dentro del vhost `/` y no tiene consumidores conectados ni mensajes pendientes.
+
+[cols="1,2", options="header"]
+|===
+| Propiedad
+| Valor
+
+| Nombre
+| `fqe.logs`
+
+| Durable
+| `true`
+
+| Auto delete
+| `false`
+
+| Exchange utilizado
+| Exchange directo por defecto
+
+| Routing key
+| `fqe.logs`
+
+| Uso
+| Transporte de eventos y logs hacia MongoDB
+|===
+
+=== Flujo General
+
+El flujo actual de RabbitMQ funciona de la siguiente forma:
+
+1. El gateway recibe solicitudes HTTP de los clientes.
+2. Un middleware identifica solicitudes importantes, como errores o acciones de escritura.
+3. El gateway construye un evento de log en formato JSON.
+4. El evento se publica en la cola `fqe.logs`.
+5. El listener `FQE-RabbitMongoListener-Node` consume mensajes desde esa cola.
+6. El listener interpreta el mensaje y agrega metadatos de RabbitMQ.
+7. El evento se guarda como documento en MongoDB, dentro de `logsdb.events`.
+8. El servicio de logs permite consultar esos documentos desde el cliente administrativo.
+
+=== Diagrama del Flujo de Mensajeria
+
+[plantuml,rabbitmq-flow,png]
+----
+@startuml
+title Flujo de Logs con RabbitMQ
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+component "Gateway\nFigurasQE-Gateway" as Gateway
+queue "RabbitMQ\ncola: fqe.logs" as Queue
+component "Listener\nFQE-RabbitMongoListener-Node" as Listener
+database "MongoDB\nlogsdb.events" as Mongo
+component "Logs Service" as LogsService
+actor "Administrador" as Admin
+
+Gateway --> Queue : publica evento JSON
+Queue --> Listener : consume mensaje
+Listener --> Mongo : guarda documento
+LogsService --> Mongo : consulta logs
+Admin --> LogsService : revisa logs
+
+@enduml
+----
+
+=== Productor de Mensajes
+
+El productor principal de mensajes es el gateway. En el codigo, el archivo encargado de publicar eventos es:
+
+[source,text]
+----
+FigurasQE-Gateway/src/services/rabbitLogPublisher.js
+----
+
+El gateway utiliza la variable `RABBITMQ_URL` para conectarse al broker y `RABBITMQ_QUEUE` para determinar la cola destino. Si no se definen variables de entorno, utiliza valores por defecto:
+
+[cols="1,2", options="header"]
+|===
+| Variable
+| Valor por defecto
+
+| `RABBITMQ_URL`
+| `amqp://guest:guest@localhost:5672`
+
+| `RABBITMQ_QUEUE`
+| `fqe.logs`
+|===
+
+Antes de publicar, el gateway declara la cola mediante `assertQueue` con la opcion `durable: true`. Los mensajes se publican con:
+
+* `contentType: application/json`
+* `persistent: true`
+
+Esto indica que el mensaje contiene JSON y que RabbitMQ debe tratarlo como persistente.
+
+=== Criterios para Publicar Logs
+
+La publicacion de logs se controla desde el middleware:
+
+[source,text]
+----
+FigurasQE-Gateway/src/middlewares/importantLogsMiddleware.js
+----
+
+El middleware registra eventos cuando:
+
+* La ruta no esta excluida.
+* El codigo de estado HTTP es mayor o igual al minimo configurado.
+* El metodo HTTP pertenece a los metodos considerados importantes.
+
+Valores por defecto:
+
+[cols="1,2", options="header"]
+|===
+| Variable
+| Valor por defecto
+
+| `IMPORTANT_LOG_ENABLED`
+| `true`
+
+| `IMPORTANT_LOG_METHODS`
+| `POST,PUT,PATCH,DELETE`
+
+| `IMPORTANT_LOG_STATUS_MIN`
+| `400`
+
+| `IMPORTANT_LOG_EXCLUDE_PREFIXES`
+| `/health,/logs`
+|===
+
+Con esta configuracion, el sistema registra acciones de escritura exitosas y solicitudes con errores, evitando rutas de salud y consulta de logs.
+
+=== Estructura del Mensaje
+
+El mensaje publicado en RabbitMQ es un JSON con informacion de la solicitud procesada.
+
+[source,json]
+----
+{
+  "service": "FiguerasQueEnse-anBD",
+  "type": "success",
+  "entityType": "student",
+  "entityId": 30,
+  "action": "PUT",
+  "route": "/data/students/30",
+  "statusCode": 200,
+  "durationMs": 17,
+  "timestamp": "2026-05-21T08:10:01.456Z"
+}
+----
+
+Campos principales:
+
+* `service`: servicio relacionado con la solicitud.
+* `type`: tipo de evento, por ejemplo `success`, `error` o `event`.
+* `entityType`: entidad involucrada, por ejemplo `student`, `tutor` o `admin`.
+* `entityId`: identificador de la entidad cuando puede resolverse.
+* `action`: metodo HTTP asociado.
+* `route`: ruta consultada.
+* `statusCode`: codigo HTTP de respuesta.
+* `durationMs`: tiempo de procesamiento en milisegundos.
+* `timestamp`: fecha y hora del evento.
+
+=== Consumidor de Mensajes
+
+El consumidor de mensajes es el servicio:
+
+[source,text]
+----
+FQE-RabbitMongoListener-Node
+----
+
+Este servicio se conecta a RabbitMQ usando las variables separadas de host, puerto, usuario, password y vhost. Tambien se conecta a MongoDB para guardar los eventos procesados.
+
+[cols="1,2", options="header"]
+|===
+| Variable
+| Valor por defecto
+
+| `RABBITMQ_HOST`
+| `localhost`
+
+| `RABBITMQ_PORT`
+| `5672`
+
+| `RABBITMQ_USERNAME`
+| `guest`
+
+| `RABBITMQ_PASSWORD`
+| `guest`
+
+| `RABBITMQ_VHOST`
+| `/`
+
+| `RABBITMQ_QUEUE`
+| `fqe.logs`
+
+| `RABBITMQ_PREFETCH`
+| `20`
+
+| `RABBITMQ_AUTO_DECLARE`
+| `true`
+
+| `RABBITMQ_DURABLE_QUEUE`
+| `true`
+
+| `RECONNECT_DELAY_MS`
+| `5000`
+|===
+
+El listener declara la cola si `RABBITMQ_AUTO_DECLARE` esta habilitado. Tambien configura `prefetch` para limitar la cantidad de mensajes que puede recibir sin confirmar al mismo tiempo.
+
+=== Confirmacion y Reintentos
+
+El listener consume mensajes con confirmacion manual:
+
+* Si el mensaje se guarda correctamente en MongoDB, el listener ejecuta `ack`.
+* Si ocurre un error al procesar o guardar el mensaje, ejecuta `nack` con requeue habilitado.
+
+Esto significa que un mensaje fallido vuelve a la cola para ser procesado nuevamente.
+
+=== Metadatos Guardados
+
+Cuando el listener recibe un mensaje, agrega metadatos de RabbitMQ antes de guardarlo en MongoDB:
+
+[source,json]
+----
+{
+  "rabbitMetadata": {
+    "deliveryTag": 10,
+    "exchange": "",
+    "routingKey": "fqe.logs",
+    "redelivered": false
+  }
+}
+----
+
+Estos metadatos ayudan a identificar como llego el mensaje al consumidor y si fue reenviado por RabbitMQ.
+
+=== Cola Utilizada por el Proyecto
+
+Aunque el broker pueda contener otras colas por pruebas o proyectos externos, la documentacion de Figuras Que Ensenan considera unicamente la cola utilizada por este sistema:
+
+[source,text]
+----
+fqe.logs
+----
+
+Esta cola es usada para transportar eventos generados por el gateway y procesados posteriormente por el listener que guarda la informacion en MongoDB.
+
+=== Consideraciones
+
+* La cola `fqe.logs` es la unica cola documentada como parte del flujo de RabbitMQ de este proyecto.
+* El gateway publica directamente en la cola usando el exchange por defecto.
+* El listener consume desde la misma cola y guarda los mensajes en MongoDB.
+* La configuracion usa mensajes persistentes y cola durable.
+* El sistema depende de que RabbitMQ este disponible en el puerto `5672`.
+* La consola web de RabbitMQ puede consultarse desde el puerto `15672`.
+* Si el listener no esta activo, los mensajes pueden acumularse en la cola hasta que vuelva a consumirlos.

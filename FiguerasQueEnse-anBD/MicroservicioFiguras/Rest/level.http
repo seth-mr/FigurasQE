@@ -1,0 +1,43 @@
+@host = http://localhost:5124
+@token = <PEGAR_TOKEN_TUTOR_47_O_STUDENT_17>
+@levelId = 1
+
+### ========================================
+### LEVELS
+### Requiere JWT valido
+### ========================================
+
+### GET /levels
+GET {{host}}/levels
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### GET /levels/{id}
+GET {{host}}/levels/{{levelId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### POST /levels
+POST {{host}}/levels
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Intermediate Advanced",
+  "difficulty": 6
+}
+
+### PUT /levels/{id}
+PUT {{host}}/levels/{{levelId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Beginner Updated",
+  "difficulty": 2
+}
+
+### DELETE /levels/{id}
+DELETE {{host}}/levels/{{levelId}}
+Authorization: Bearer {{token}}
+Accept: application/json

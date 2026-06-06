@@ -1,0 +1,112 @@
+@host = http://localhost:5124
+
+### Tokens obtenidos desde Rest/auth.http
+@tutor47Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NyIsImVtYWlsIjoianVhbi5nYXJjaWFAbWFpbC5jb20iLCJyb2xlIjoidHV0b3IiLCJpc3MiOiJmaWd1cmFzcWUtYXV0aCIsImF1ZCI6ImZpZ3VyYXNxZS1jbGllbnQiLCJpYXQiOjE3Nzk3NDQ5NzIsImV4cCI6MTc3OTc0ODU3Mn0.HhahdRQLHVZJtcCmNQQKZ804Xl35CIy8hXgcmsYbYTE
+@tutor48Token = <PEGAR_TOKEN_TUTOR_48>
+@student17Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNyIsImVtYWlsIjoibHVpcy5tYXJ0aW5lekBtYWlsLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaXNzIjoiZmlndXJhc3FlLWF1dGgiLCJhdWQiOiJmaWd1cmFzcWUtY2xpZW50IiwiaWF0IjoxNzc4MzcyNzA2LCJleHAiOjE3NzgzNzYzMDZ9.oi2z789OvTEYf762ncPFZHZk7faabxZxEaXUU-De_qc
+@student19Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxOSIsImVtYWlsIjoicGFibG8ucm9kcmlndWV6QG1haWwuY29tIiwicm9sZSI6InN0dWRlbnQiLCJpc3MiOiJmaWd1cmFzcWUtYXV0aCIsImF1ZCI6ImZpZ3VyYXNxZS1jbGllbnQiLCJpYXQiOjE3Nzg2Mzg4MTUsImV4cCI6MTc3ODY0MjQxNX0.sTKI3BoPccS-6oeEUg6BGVUfqr8xXPMXvH_knptaQlE
+
+@student17 = 20
+@student18 = 18
+@student19 = 19
+@tutor47 = 47
+@tutor48 = 48
+
+### ========================================
+### STUDENTS - REGLAS JWT
+### - tutor solo su grupo
+### - student solo sus propios datos
+### ========================================
+
+### [OK] Tutor 47: solo estudiantes de tutor 47
+GET {{host}}/students
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Tutor 47: estudiante 17 (asignado)
+GET {{host}}/students/{{student17}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 47: estudiante 19 (es de tutor 48)
+GET {{host}}/students/{{student19}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Student 19: ver su propio perfil
+GET {{host}}/students/{{student19}}
+Authorization: Bearer {{student19Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Student 17: no puede ver student 18
+GET {{host}}/students/{{student18}}
+Authorization: Bearer {{student17Token}}
+Accept: application/json
+
+### [OK] Tutor 47: tutor de student 17
+GET {{host}}/students/{{student17}}/tutor
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Tutor 47: ids de sus estudiantes
+GET {{host}}/students/tutor/{{tutor47}}/ids
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 48 no puede pedir ids de tutor 47
+GET {{host}}/students/tutor/{{tutor47}}/ids
+Authorization: Bearer {{tutor48Token}}
+Accept: application/json
+
+### [OK] Student 17: ids de sus sesiones
+GET {{host}}/students/{{student17}}/sessions/ids
+Authorization: Bearer {{student17Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Student 17 no puede pedir sesiones de student 19
+GET {{host}}/students/{{student19}}/sessions/ids
+Authorization: Bearer {{student17Token}}
+Accept: application/json
+
+### ========================================
+### CRUD TECNICO (usar con cuidado)
+### Nota: para usuarios con login funcional, crear por Auth Service
+### ========================================
+
+### POST /students (microservicio directo)
+POST {{host}}/students
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idTutor": {{17 }},
+  "name": "Ana Lopez",
+  "email": "ana.student@example.com",
+  "passwordHash": "StudentPass123",
+  "age": 10,
+  "gender": "F",
+  "country": "CO",
+  "neurodivergency": "None"
+}
+
+### PUT /students/{id}
+PUT {{host}}/students/{{student17}}
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idTutor": {{17 }},
+  "name": "Ana Lopez Actualizada",
+  "email": "ana.student@example.com",
+  "passwordHash": "StudentPass1234",
+  "age": 11,
+  "gender": "M",
+  "country": "CO",
+  "neurodivergency": "None"
+}
+
+### DELETE /students/{id}
+### CUIDADO: elimina tambien sus sesiones/resultados por FK segun BD
+DELETE {{host}}/students/{{student18}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json

@@ -1,0 +1,532 @@
+== Casos de Uso
+
+Esta seccion describe los casos de uso globales identificados a partir de los clientes y servicios del proyecto. Para efectos de la documentacion, el rol de profesor se considera dentro del perfil `tutor`, ya que en el sistema este usuario representa a la persona adulta que acompana, supervisa o da seguimiento a uno o varios estudiantes. Este rol tambien puede corresponder a padres o responsables del acompanamiento educativo.
+
+=== Actores del Sistema
+
+[cols="1,3", options="header"]
+|===
+| Actor
+| Descripcion
+
+| Estudiante
+| Usuario principal de la experiencia educativa. Puede consultar su informacion, su tutor asignado, sus sesiones y sus resultados de actividad.
+
+| Profesor / Tutor / Padre
+| Usuario responsable del seguimiento de estudiantes. Puede consultar su perfil, asociar estudiantes y revisar informacion, sesiones y resultados de los alumnos asignados.
+
+| Administrador
+| Usuario encargado de supervisar la operacion general del sistema. Puede iniciar sesion en el cliente administrativo, consultar estadisticas, revisar logs, monitorear servicios y gestionar su informacion administrativa.
+|===
+
+=== Diagramas de Casos de Uso
+
+Para mejorar la lectura, los casos de uso se presentan en diagramas separados por actor.
+
+==== Estudiante
+
+[plantuml,casos-uso-estudiante,png]
+----
+@startuml
+title Casos de Uso - Estudiante
+
+scale 720 width
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1
+skinparam usecase {
+  BackgroundColor #F8F8F8
+  BorderColor #444444
+  FontSize 11
+}
+
+actor "Estudiante" as Estudiante
+
+rectangle "Sistema Figuras Que Ensenan" {
+  usecase "Registrarse\ncomo estudiante" as UCE01
+  usecase "Iniciar\nsesion" as UCE02
+  usecase "Acceder al\npanel" as UCE03
+  usecase "Consultar\ninformacion personal" as UCE04
+  usecase "Consultar\ntutor asignado" as UCE05
+  usecase "Consultar\nsesiones" as UCE06
+  usecase "Consultar\nresultados" as UCE07
+  usecase "Jugar\nnivel" as UCE08
+  usecase "Cerrar\nsesion" as UCE09
+}
+
+Estudiante --> UCE01
+Estudiante --> UCE02
+Estudiante --> UCE03
+Estudiante --> UCE04
+Estudiante --> UCE05
+Estudiante --> UCE06
+Estudiante --> UCE07
+Estudiante --> UCE08
+Estudiante --> UCE09
+
+@enduml
+----
+
+==== Profesor, Tutor o Padre
+
+[plantuml,casos-uso-tutor,png]
+----
+@startuml
+title Casos de Uso - Profesor / Tutor / Padre
+
+scale 720 width
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1
+skinparam usecase {
+  BackgroundColor #F8F8F8
+  BorderColor #444444
+  FontSize 10
+}
+
+actor "Profesor / Tutor / Padre" as Tutor
+
+rectangle "Sistema Figuras Que Ensenan" {
+  usecase "Registrarse\ncomo tutor" as UCT01
+  usecase "Iniciar\nsesion" as UCT02
+  usecase "Acceder al\npanel" as UCT03
+  usecase "Consultar\nperfil" as UCT04
+  usecase "Actualizar\nperfil" as UCT05
+  usecase "Asociar\nestudiante" as UCT06
+  usecase "Consultar\nestudiantes" as UCT07
+  usecase "Consultar detalle\nde estudiante" as UCT08
+  usecase "Consultar\nsesiones" as UCT09
+  usecase "Filtrar sesiones\npor periodo" as UCT10
+  usecase "Consultar\nresultados" as UCT11
+  usecase "Cerrar\nsesion" as UCT12
+}
+
+Tutor --> UCT01
+Tutor --> UCT02
+Tutor --> UCT03
+Tutor --> UCT04
+Tutor --> UCT05
+Tutor --> UCT06
+Tutor --> UCT07
+Tutor --> UCT08
+Tutor --> UCT09
+Tutor --> UCT10
+Tutor --> UCT11
+Tutor --> UCT12
+
+UCT10 ..> UCT09 : <<extend>>
+
+@enduml
+----
+
+==== Administrador
+
+[plantuml,casos-uso-administrador,png]
+----
+@startuml
+title Casos de Uso - Administrador
+
+scale 720 width
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1
+skinparam usecase {
+  BackgroundColor #F8F8F8
+  BorderColor #444444
+  FontSize 11
+}
+
+actor "Administrador" as Admin
+
+rectangle "Sistema Figuras Que Ensenan" {
+  usecase "Iniciar sesion\nadmin" as UCA01
+  usecase "Consultar\npanel" as UCA02
+  usecase "Consultar\nperfil" as UCA03
+  usecase "Actualizar\nperfil" as UCA04
+  usecase "Consultar\nestadisticas" as UCA05
+  usecase "Analizar\ndistribuciones" as UCA06
+  usecase "Consultar\nlogs" as UCA07
+  usecase "Monitorear\nservicios" as UCA08
+  usecase "Verificar estado\nde servicio" as UCA09
+  usecase "Cerrar\nsesion" as UCA10
+}
+
+Admin --> UCA01
+Admin --> UCA02
+Admin --> UCA03
+Admin --> UCA04
+Admin --> UCA05
+Admin --> UCA06
+Admin --> UCA07
+Admin --> UCA08
+Admin --> UCA09
+Admin --> UCA10
+
+UCA09 ..> UCA08 : <<include>>
+
+@enduml
+----
+
+=== Casos de Uso del Estudiante
+
+[cols="1,2,4", options="header"]
+|===
+| ID
+| Caso de uso
+| Descripcion
+
+| CU-E-01
+| Registrarse como estudiante
+| El estudiante puede crear una cuenta proporcionando sus datos personales y credenciales de acceso. El registro permite identificarlo dentro del sistema y asociar posteriormente su actividad educativa.
+
+| CU-E-02
+| Iniciar sesion
+| El estudiante puede iniciar sesion con correo y contrasena. Al autenticarse, el sistema genera un token que permite reconocer su identidad y rol.
+
+| CU-E-03
+| Acceder al panel del estudiante
+| El sistema dirige al estudiante a su pantalla principal, donde puede consultar un resumen de su informacion, sesiones registradas y estado general de su actividad.
+
+| CU-E-04
+| Consultar informacion personal
+| El estudiante puede visualizar sus datos registrados, como nombre, edad, genero, pais, correo y condicion de neurodivergencia cuando aplique.
+
+| CU-E-05
+| Consultar tutor asignado
+| El estudiante puede revisar la informacion del tutor asociado a su cuenta, cuando exista una asignacion registrada.
+
+| CU-E-06
+| Consultar sesiones de uso
+| El estudiante puede consultar el historial de sesiones asociadas a su cuenta, incluyendo fechas, dispositivo y datos relacionados con la actividad.
+
+| CU-E-07
+| Consultar resultados de niveles
+| El estudiante puede consultar resultados asociados a sus sesiones, como niveles completados, intentos, fallos, tiempo de finalizacion y estado de completado.
+
+| CU-E-08
+| Jugar nivel
+| El estudiante puede realizar una actividad o nivel dentro de la aplicacion. Durante este proceso, el sistema registra la sesion de uso y guarda los resultados obtenidos, como intentos, fallos, tiempo de finalizacion y estado de completado.
+
+| CU-E-09
+| Cerrar sesion
+| El estudiante puede cerrar su sesion para finalizar el acceso activo a la aplicacion.
+|===
+
+=== Casos de Uso del Profesor, Tutor o Padre
+
+[cols="1,2,4", options="header"]
+|===
+| ID
+| Caso de uso
+| Descripcion
+
+| CU-T-01
+| Registrarse como tutor
+| El profesor, tutor o padre puede crear una cuenta con sus datos personales, credenciales y grado o perfil correspondiente.
+
+| CU-T-02
+| Iniciar sesion
+| El tutor puede iniciar sesion con correo y contrasena. El sistema valida sus credenciales y lo dirige a las funciones correspondientes a su rol.
+
+| CU-T-03
+| Acceder al panel del tutor
+| El tutor puede consultar una vista principal con su informacion general y el numero de estudiantes asociados a su cuenta.
+
+| CU-T-04
+| Consultar perfil del tutor
+| El tutor puede visualizar sus datos personales y profesionales, como nombre, correo, pais, genero, edad, grado y fecha de registro.
+
+| CU-T-05
+| Actualizar perfil del tutor
+| El tutor puede modificar datos editables de su perfil, como pais, genero, edad o grado.
+
+| CU-T-06
+| Asociar estudiante
+| El tutor puede vincular un estudiante a su cuenta mediante el correo del alumno, siempre que la relacion sea valida.
+
+| CU-T-07
+| Consultar estudiantes asignados
+| El tutor puede ver la lista de estudiantes asociados a su cuenta y acceder al detalle de cada uno.
+
+| CU-T-08
+| Consultar detalle de estudiante
+| El tutor puede revisar la informacion individual de un estudiante asignado, incluyendo datos personales, tutor asignado y caracteristicas registradas.
+
+| CU-T-09
+| Consultar sesiones de estudiantes
+| El tutor puede consultar las sesiones de uso de sus estudiantes asignados, incluyendo historial y datos de actividad.
+
+| CU-T-10
+| Filtrar sesiones por periodo
+| El tutor puede filtrar sesiones por rangos de tiempo, como hoy, ultimos dias, ultimo mes o todas las sesiones disponibles.
+
+| CU-T-11
+| Consultar resultados de estudiantes
+| El tutor puede revisar resultados de niveles asociados a los estudiantes bajo su seguimiento, incluyendo intentos, fallos, tiempo y niveles completados.
+
+| CU-T-12
+| Cerrar sesion
+| El tutor puede cerrar su sesion para terminar el acceso activo a la aplicacion.
+|===
+
+=== Casos de Uso del Administrador
+
+[cols="1,2,4", options="header"]
+|===
+| ID
+| Caso de uso
+| Descripcion
+
+| CU-A-01
+| Iniciar sesion como administrador
+| El administrador puede acceder al cliente administrativo mediante credenciales propias. El sistema valida que el usuario tenga rol de administrador.
+
+| CU-A-02
+| Consultar panel administrativo
+| El administrador puede acceder a una pantalla principal desde la que navega hacia cuenta, logs, monitoreo de servicios y estadisticas.
+
+| CU-A-03
+| Consultar perfil administrativo
+| El administrador puede visualizar los datos de su cuenta, como nombre, correo, telefono, usuario y fecha de registro.
+
+| CU-A-04
+| Actualizar perfil administrativo
+| El administrador puede modificar informacion de su cuenta, incluyendo datos personales y contrasena cuando sea necesario.
+
+| CU-A-05
+| Consultar estadisticas generales
+| El administrador puede revisar un resumen estadistico con totales de estudiantes, tutores, administradores, usuarios registrados, actividad reciente, horas jugadas y niveles superados.
+
+| CU-A-06
+| Analizar distribuciones de usuarios
+| El administrador puede consultar metricas agrupadas por genero de estudiantes, neurodivergencia de estudiantes, grado de tutores y genero de tutores.
+
+| CU-A-07
+| Consultar logs del sistema
+| El administrador puede revisar eventos generados por los servicios para analizar actividad, errores, rutas consultadas y acciones realizadas. Esta consulta puede realizarse mediante filtros y tambien puede mostrar eventos en tiempo real.
+
+| CU-A-08
+| Monitorear servicios
+| El administrador puede consultar tarjetas de servicios conocidos para revisar su estado general y rutas de verificacion.
+
+| CU-A-09
+| Verificar estado de un servicio
+| El administrador puede ejecutar una consulta de salud sobre servicios configurados para validar si responden correctamente.
+
+| CU-A-10
+| Cerrar sesion
+| El administrador puede cerrar su sesion en el cliente administrativo.
+|===
+
+=== Descripcion Detallada de Casos de Uso Principales
+
+Los siguientes casos de uso detallan los flujos mas importantes del sistema y se derivan de los casos ya definidos en las tablas anteriores. Cuando una misma funcion existe para mas de un rol, se agrupa en una sola descripcion para evitar repetir el mismo comportamiento tecnico.
+
+==== CU Principal 01: Iniciar sesion
+
+[cols="1,3", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Actores
+| Estudiante, Profesor / Tutor / Padre y Administrador.
+
+| Precondiciones
+| El usuario debe existir en el sistema. El API Gateway, el microservicio de autenticacion y PostgreSQL deben estar disponibles. El cliente debe conocer la URL del Gateway.
+
+| Postcondiciones
+| El usuario queda autenticado. El cliente conserva el token JWT recibido y puede consumir las funciones permitidas por su rol.
+
+| Flujo principal
+a|
+. El actor ingresa correo y contrasena en el cliente correspondiente.
+. El cliente envia la solicitud al API Gateway.
+. El Gateway redirige la peticion al microservicio de autenticacion.
+. El microservicio valida las credenciales contra PostgreSQL.
+. Si las credenciales son correctas, el sistema genera un token JWT con identidad y rol.
+. El token se devuelve al cliente.
+. El cliente dirige al usuario hacia las funciones permitidas para su rol.
+
+| Flujos alternos
+a|
+* Si el actor es estudiante o tutor, el inicio de sesion se realiza mediante el flujo general de autenticacion.
+* Si el actor es administrador, el inicio de sesion se realiza mediante el flujo administrativo y el sistema valida que el usuario tenga rol de administrador.
+
+| Flujos de excepcion
+a|
+* Si las credenciales son incorrectas, el sistema rechaza el acceso.
+* Si el usuario no existe, el sistema responde con error de autenticacion.
+* Si el token no puede generarse, el sistema no inicia sesion.
+* Si el Gateway, el servicio de autenticacion o PostgreSQL no estan disponibles, el cliente muestra un error de conexion o servicio.
+|===
+
+==== CU Principal 02: Registrar usuario
+
+[cols="1,3", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Actores
+| Estudiante y Profesor / Tutor / Padre.
+
+| Precondiciones
+| El usuario no debe estar registrado previamente con el mismo correo. El API Gateway, el microservicio de autenticacion y PostgreSQL deben estar disponibles.
+
+| Postcondiciones
+| Se crea la cuenta del usuario con el rol correspondiente. El usuario queda disponible para iniciar sesion o continuar el flujo de autenticacion definido por el cliente.
+
+| Flujo principal
+a|
+. El actor abre el formulario de registro.
+. El actor captura sus datos personales y credenciales.
+. El cliente envia la informacion al API Gateway.
+. El Gateway redirige la solicitud al microservicio de autenticacion.
+. El microservicio valida los datos recibidos.
+. El sistema verifica que el correo no exista previamente.
+. El sistema guarda la cuenta en PostgreSQL con el rol correspondiente.
+. El sistema responde confirmando el registro.
+
+| Flujos alternos
+a|
+* Si el actor se registra como estudiante, la cuenta se crea con el rol de estudiante.
+* Si el actor se registra como tutor, profesor o padre, la cuenta se crea con el rol de tutor.
+
+| Flujos de excepcion
+a|
+* Si faltan campos obligatorios, el sistema rechaza la solicitud.
+* Si el formato de los datos no es valido, el sistema devuelve error de validacion.
+* Si el correo ya existe, el sistema no crea una cuenta duplicada.
+* Si PostgreSQL no esta disponible, el sistema no registra la cuenta.
+|===
+
+==== CU Principal 03: Consultar progreso del estudiante
+
+[cols="1,3", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Actores
+| Estudiante y Profesor / Tutor / Padre.
+
+| Precondiciones
+| El actor debe haber iniciado sesion. El token JWT debe ser valido. El Gateway, el microservicio de datos y PostgreSQL deben estar disponibles.
+
+| Postcondiciones
+| El actor visualiza informacion de progreso permitida por su rol. No se modifican datos al realizar la consulta.
+
+| Flujo principal
+a|
+. El actor solicita consultar informacion de progreso.
+. El cliente envia la peticion al API Gateway con el token JWT.
+. El Gateway redirige la solicitud al microservicio de datos.
+. El microservicio valida la identidad y el rol del actor.
+. El servicio consulta PostgreSQL.
+. El sistema devuelve informacion de perfil, tutor, estudiantes asignados, sesiones o resultados segun corresponda.
+. El cliente muestra la informacion al actor.
+
+| Flujos alternos
+a|
+* Si el actor es estudiante, solo puede consultar informacion asociada a su propia cuenta.
+* Si el actor es tutor, profesor o padre, solo puede consultar estudiantes asociados a su cuenta.
+* Si el tutor filtra sesiones por periodo, el sistema limita los resultados al rango solicitado.
+
+| Flujos de excepcion
+a|
+* Si el token esta ausente, expirado o es invalido, el sistema rechaza la consulta.
+* Si el actor intenta consultar informacion fuera de sus permisos, el sistema niega el acceso.
+* Si no existen registros de sesiones o resultados, el sistema devuelve una respuesta vacia o sin datos.
+* Si el microservicio de datos o PostgreSQL no estan disponibles, el cliente muestra un error de servicio.
+|===
+
+==== CU Principal 04: Jugar nivel
+
+[cols="1,3", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Actores
+| Estudiante.
+
+| Precondiciones
+| El estudiante debe haber iniciado sesion. El cliente debe contar con un token JWT valido. El Gateway, el microservicio de datos y PostgreSQL deben estar disponibles. Para actividades con deteccion de manos, tambien debe estar disponible HandsDetection.
+
+| Postcondiciones
+| La actividad queda reflejada como sesion de uso y resultado de nivel cuando el flujo se completa correctamente. El avance puede consultarse posteriormente por el estudiante o por su tutor.
+
+| Flujo principal
+a|
+. El estudiante inicia un nivel o actividad desde el cliente.
+. El cliente ejecuta la experiencia interactiva del nivel.
+. Si la actividad requiere deteccion de dedos, el cliente envia la imagen al API Gateway mediante la ruta `/hands`.
+. El Gateway envia la imagen al servicio HandsDetection mediante gRPC.
+. HandsDetection procesa la imagen y devuelve el conteo de dedos detectado.
+. El cliente utiliza la respuesta para continuar la actividad.
+. Al finalizar, el cliente envia los datos de sesion o resultado al API Gateway.
+. El Gateway redirige la informacion al microservicio de datos.
+. El microservicio valida la solicitud y guarda la sesion o resultado en PostgreSQL.
+. El sistema confirma el registro del avance.
+
+| Flujos alternos
+a|
+* Si el nivel no requiere deteccion de manos, el flujo continua sin invocar HandsDetection.
+* Si el estudiante no completa el nivel, el sistema puede conservar solo la informacion de sesion o no registrar resultado completado, segun la informacion enviada por el cliente.
+
+| Flujos de excepcion
+a|
+* Si el token del estudiante es invalido, el sistema rechaza el registro.
+* Si HandsDetection no responde, la actividad que depende de deteccion de manos no puede obtener el conteo esperado.
+* Si los datos de sesion o resultado son invalidos, el microservicio de datos rechaza la solicitud.
+* Si PostgreSQL no esta disponible, el avance no puede persistirse.
+|===
+
+==== CU Principal 05: Consultar logs y monitorear servicios
+
+[cols="1,3", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Actores
+| Administrador.
+
+| Precondiciones
+| El administrador debe haber iniciado sesion en el cliente WPF. El token JWT debe ser valido. El Gateway y los servicios consultados deben estar disponibles para responder.
+
+| Postcondiciones
+| El administrador visualiza logs, eventos o estado de servicios. La consulta no modifica informacion del sistema.
+
+| Flujo principal
+a|
+. El administrador abre el cliente WPF.
+. El administrador inicia sesion mediante el API Gateway.
+. El administrador entra a la seccion de logs o monitoreo.
+. El WPF consulta al API Gateway usando el token JWT.
+. Para logs, el Gateway redirige la consulta al Logs Service.
+. El Logs Service consulta los eventos almacenados en `mongo-logs`.
+. Para monitoreo, el Gateway consulta el endpoint de salud del servicio solicitado.
+. El WPF muestra logs, filtros, eventos en tiempo real o tarjetas de estado segun la accion seleccionada.
+
+| Flujos alternos
+a|
+* El administrador puede consultar logs generales o filtrarlos por servicio.
+* El administrador puede recibir eventos de logs en tiempo real mediante WebSocket.
+* El administrador puede consultar el estado de Gateway, Auth Service, microservicio de datos, Logs Service, RabbitMQ Mongo Listener, MongoDB, PostgreSQL y HandsDetection.
+
+| Flujos de excepcion
+a|
+* Si el token del administrador es invalido, el sistema rechaza la consulta.
+* Si Logs Service no esta disponible, el WPF no puede cargar los logs.
+* Si `mongo-logs` no esta disponible, Logs Service no puede recuperar eventos.
+* Si RabbitMQ o el listener estan detenidos, pueden dejar de persistirse nuevos eventos.
+* Si un servicio no responde al monitoreo, el WPF lo muestra como no disponible o con error.
+|===

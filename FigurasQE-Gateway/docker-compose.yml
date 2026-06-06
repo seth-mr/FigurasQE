@@ -1,0 +1,33 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fqe-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AUTH_SERVICE: http://host.docker.internal:5041
+      DATA_SERVICE: http://host.docker.internal:5124
+      LOGS_SERVICE: http://host.docker.internal:5186
+      FRONTEND_SERVICE: http://figurasqe-frontend:8080
+      RABBIT_LISTENER_SERVICE: http://host.docker.internal:5190
+      HANDS_DETECTION_SERVICE: http://fqe-hands-detection:8080
+      RABBITMQ_URL: amqp://guest:guest@host.docker.internal:5672
+      RABBITMQ_QUEUE: fqe.logs
+      IMPORTANT_LOG_ENABLED: "true"
+      IMPORTANT_LOG_METHODS: POST,PUT,PATCH,DELETE
+      IMPORTANT_LOG_STATUS_MIN: 400
+      IMPORTANT_LOG_EXCLUDE_PREFIXES: /health,/logs
+      FINGER_GRPC_TARGET: fqe-hands-detection:50051
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 15s

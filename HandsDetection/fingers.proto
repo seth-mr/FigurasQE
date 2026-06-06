@@ -1,0 +1,21 @@
+// fingers.proto
+syntax = "proto3";
+
+package fingers;
+
+service FingerDetector {
+  rpc StreamFrames (stream FrameRequest) returns (stream FingerResponse);
+}
+
+message FrameRequest {
+  bytes image_data = 1;
+  string client_id = 2;
+}
+
+message FingerResponse {
+  int32 left_hand    = 1;
+  int32 right_hand   = 2;
+  int32 total        = 3;
+  bool  hands_detected = 4;
+  string client_id   = 5;
+}

@@ -1,0 +1,61 @@
+@using System.Text.Json
+@using FigurasQE_WebClient.Services
+@inject IConfiguration Configuration
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>@ViewData["Title"] - FigurasQE</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/FigurasQE_WebClient.styles.css" asp-append-version="true" />
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <a asp-page="/Levels/LevelsCatalog" class="level-back-button btn btn-light shadow-sm">
+        Regresar
+    </a>
+
+    <button id="music-toggle" class="level-music-button btn btn-light shadow-sm" type="button" aria-pressed="false">
+        Musica
+    </button>
+
+    <div id="level-instructions" class="level-instructions" role="status" aria-live="polite" hidden>
+        <p class="level-instructions-eyebrow">Tu reto</p>
+        <h2 id="level-instructions-title"></h2>
+        <p id="level-instructions-body"></p>
+    </div>
+
+    <div class="finger-sum-display" aria-live="polite">
+        <span class="finger-sum-value" id="left-cloud-count">0</span>
+        <span class="finger-sum-symbol">+</span>
+        <span class="finger-sum-value" id="right-cloud-count">0</span>
+        <span class="finger-sum-symbol">=</span>
+        <span class="finger-sum-value finger-sum-total" id="total-cloud-count">0</span>
+    </div>
+
+    <main role="main" class="flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
+
+        @RenderBody()
+
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        window.FIGURAS_API_BASE_URL = @Html.Raw(JsonSerializer.Serialize(ApiGatewayRoutes.PublicBaseUrl(Configuration)));
+    </script>
+    <script src="~/js/levels.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

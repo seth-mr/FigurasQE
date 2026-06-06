@@ -1,0 +1,98 @@
+@host = http://localhost:5124
+
+### Tokens desde Rest/auth.http
+@tutor47Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NyIsImVtYWlsIjoianVhbi5nYXJjaWFAbWFpbC5jb20iLCJyb2xlIjoidHV0b3IiLCJpc3MiOiJmaWd1cmFzcWUtYXV0aCIsImF1ZCI6ImZpZ3VyYXNxZS1jbGllbnQiLCJpYXQiOjE3NzgzNzI0MDMsImV4cCI6MTc3ODM3NjAwM30.0_dZ7LMJRTTZC_oSbGnU2BYMXUEkNoRcBrOX6cFJZHw
+@tutor48Token = <PEGAR_TOKEN_TUTOR_48>
+
+@tutor47 = 47
+@tutor48 = 48
+
+### ========================================
+### TUTORS - REGLA CLAVE
+### Un JWT de tutor solo accede a su propio tutorId
+### ========================================
+
+### [OK] Perfil del tutor autenticado (tutor 47)
+GET {{host}}/tutors
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Tutor 47 consulta su id
+GET {{host}}/tutors/{{tutor47}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 47 no puede consultar tutor 48
+GET {{host}}/tutors/{{tutor48}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Tutor 47: ver sus estudiantes
+GET {{host}}/tutors/{{tutor47}}/students
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 47 no puede ver alumnos de tutor 48
+GET {{host}}/tutors/{{tutor48}}/students
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### ========================================
+### CRUD TECNICO (usar con cuidado)
+### Nota: para login funcional, registrar por Auth Service
+### ========================================
+
+### POST /tutors (crea tutor directo en microservicio)
+POST {{host}}/tutors
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "name": "Carlos Ramirez",
+  "email": "carlos.gabriel@example.com",
+  "passwordHash": "TutorPass123",
+  "country": "CO",
+  "gender": "M",
+  "age": 35,
+  "degree": "Maestria"
+}
+
+### PUT /tutors/{id}
+PUT {{host}}/tutors/{{tutor47}}
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "name": "Juan Garcia",
+  "email": "juan.garcia@mail.com",
+  "country": "MX",
+  "gender": "M",
+  "age": 35,
+  "grade": "Maestria"
+}
+
+### Assign student by email (JWT tutor debe coincidir con tutorEmail)
+POST {{host}}/tutors/assign-student
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "studentEmail": "student.demo@mail.com",
+  "tutorEmail": "juan.garcia@mail.com"
+}
+
+### [FORBIDDEN esperado] tutor47 intentando asignar con email de tutor48
+POST {{host}}/tutors/assign-student
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "studentEmail": "student.demo@mail.com",
+  "tutorEmail": "maria.lopez@mail.com"
+}
+
+### DELETE /tutors/{id}
+### CUIDADO: rompe relacion con students y potencialmente flujo funcional
+DELETE {{host}}/tutors/{{tutor47}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json

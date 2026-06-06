@@ -1,0 +1,106 @@
+@host = http://localhost:5124
+@tutor47Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NyIsImVtYWlsIjoianVhbi5nYXJjaWFAbWFpbC5jb20iLCJyb2xlIjoidHV0b3IiLCJpc3MiOiJmaWd1cmFzcWUtYXV0aCIsImF1ZCI6ImZpZ3VyYXNxZS1jbGllbnQiLCJpYXQiOjE3Nzk3NDQ5NzIsImV4cCI6MTc3OTc0ODU3Mn0.HhahdRQLHVZJtcCmNQQKZ804Xl35CIy8hXgcmsYbYTE
+@student17Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNyIsImVtYWlsIjoibHVpcy5tYXJ0aW5lekBtYWlsLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaXNzIjoiZmlndXJhc3FlLWF1dGgiLCJhdWQiOiJmaWd1cmFzcWUtY2xpZW50IiwiaWF0IjoxNzc5NzQ0OTE0LCJleHAiOjE3Nzk3NDg1MTR9.zRDRK6d07EvXLhIQ0dxh8283Tcd8uPTJ7Sni1RLOElU
+
+@levelResultOwn = 1
+@levelResultOtherTutor = 5
+@sessionOwn = 1
+@sessionOtherTutor = 3
+
+### ========================================
+### LEVEL RESULTS
+### Regla fuerte:
+### - Tutor solo accede a resultados de sesiones de sus estudiantes
+### - Student solo accede a resultados de sus propias sesiones
+### ========================================
+
+### [OK] Tutor 47 lista resultados de su alcance
+GET {{host}}/level-results
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Student 17 lista sus resultados
+GET {{host}}/level-results
+Authorization: Bearer {{student17Token}}
+Accept: application/json
+
+### [OK] Tutor 47 consulta resultado propio
+GET {{host}}/level-results/{{levelResultOwn}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 47 no puede consultar resultado de tutor 48
+GET {{host}}/level-results/{{levelResultOtherTutor}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [OK] Tutor 47 consulta ids de resultados de sesión propia
+GET {{host}}/sessions/{{sessionOwn}}/level-results/ids
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### [FORBIDDEN esperado] Tutor 47 no puede consultar ids de sesión de tutor 48
+GET {{host}}/sessions/{{sessionOtherTutor}}/level-results/ids
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json
+
+### POST /level-results en sesión propia
+POST {{host}}/level-results
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idSession": {{sessionOwn}},
+  "idLevel": 2,
+  "finishingTime": 1500,
+  "attempts": 1,
+  "fails": 0,
+  "completed": true
+}
+
+### [FORBIDDEN esperado] POST /level-results en sesión de otro tutor
+POST {{host}}/level-results
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idSession": {{sessionOtherTutor}},
+  "idLevel": 2,
+  "finishingTime": 1500,
+  "attempts": 1,
+  "fails": 0,
+  "completed": true
+}
+
+### PUT /level-results/{id} dentro de su alcance
+PUT {{host}}/level-results/{{levelResultOwn}}
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idSession": {{sessionOwn}},
+  "idLevel": 1,
+  "finishingTime": 1600,
+  "attempts": 2,
+  "fails": 1,
+  "completed": true
+}
+
+### [FORBIDDEN esperado] PUT intenta mover resultado a sesión de otro tutor
+PUT {{host}}/level-results/{{levelResultOwn}}
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "idSession": {{sessionOtherTutor}},
+  "idLevel": 1,
+  "finishingTime": 1600,
+  "attempts": 2,
+  "fails": 1,
+  "completed": true
+}
+
+### DELETE /level-results/{id}
+DELETE {{host}}/level-results/{{levelResultOwn}}
+Authorization: Bearer {{tutor47Token}}
+Accept: application/json

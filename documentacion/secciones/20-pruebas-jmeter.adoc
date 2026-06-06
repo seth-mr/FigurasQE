@@ -1,0 +1,102 @@
+== Pruebas de Estres con JMeter
+
+Para complementar las pruebas funcionales con Newman, se ejecuto una prueba de estres sobre el gateway del sistema utilizando Apache JMeter. La ejecucion se realizo contra el gateway expuesto en `http://localhost:3000`, con una mezcla de solicitudes publicas y protegidas para aproximarse a un escenario de uso real.
+
+[cols="2,3", options="header"]
+|===
+|Configuracion |Valor aplicado
+
+|Herramienta
+|Apache JMeter 5.6.3
+
+|Fecha de ejecucion
+|27 de mayo de 2026, 00:39 (America/Mexico_City)
+
+|Usuarios concurrentes
+|46
+
+|Ramp-up
+|15 segundos
+
+|Loops por usuario
+|10
+
+|Solicitudes esperadas por iteracion
+|5
+|===
+
+La mezcla de trafico enviada al gateway incluyo los siguientes endpoints:
+
+[cols="2,4", options="header"]
+|===
+|Endpoint |Objetivo
+
+|`GET /health`
+|Validar disponibilidad general del gateway.
+
+|`GET /openapi.json`
+|Verificar exposicion del contrato OpenAPI.
+
+|`POST /auth/login`
+|Medir el costo de autenticacion y generacion de JWT.
+
+|`GET /data/students`
+|Probar el paso hacia un endpoint protegido usando token JWT.
+
+|`GET /logs/api/logs?limit=2`
+|Validar el enrutamiento hacia el servicio de logs.
+|===
+
+Los resultados consolidados de la corrida fueron los siguientes:
+
+[cols="2,2", options="header"]
+|===
+|Metrica |Resultado
+
+|Solicitudes totales
+|2300
+
+|Errores
+|0
+
+|Porcentaje de error
+|0%
+
+|Throughput promedio
+|70.9 solicitudes por segundo
+
+|Tiempo medio de respuesta total
+|53.7 ms
+
+|Tiempo maximo observado
+|274 ms
+|===
+
+De manera puntual, los tiempos medios por endpoint fueron:
+
+[cols="2,2,2", options="header"]
+|===
+|Endpoint |Solicitudes |Tiempo medio
+
+|`GET /health`
+|460
+|6.1 ms
+
+|`GET /openapi.json`
+|460
+|6.2 ms
+
+|`POST /auth/login`
+|460
+|209.0 ms
+
+|`GET /data/students`
+|460
+|23.1 ms
+
+|`GET /logs/api/logs?limit=2`
+|460
+|24.1 ms
+|===
+
+La evidencia generada por JMeter quedo almacenada en una carpeta de resultados con archivo `.jtl`, bitacora de ejecucion y reporte HTML. En esta corrida, el reporte fue generado en `C:\fig\jmeter-results\gateway-stress-20260527-003925\html-report\index.html`.

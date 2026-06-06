@@ -1,0 +1,101 @@
+@authHost = http://localhost:5041
+@figuresHost = http://localhost:5124
+
+### ==================================================
+### AUTH FLOW OFICIAL
+### 1) Hacer login aqui
+### 2) Copiar token de respuesta
+### 3) Pegar tokens en los demas .http de Rest
+### ==================================================
+
+### Login tutor 47 (Juan)
+POST {{authHost}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.garcia@mail.com",
+  "password": "securepass123"
+}
+
+###
+
+### Login tutor 48 (Maria)
+POST {{authHost}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria.lopez@mail.com",
+  "password": "  "
+}
+
+###
+
+### Login student 17 (Luis)
+POST {{authHost}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "luis.martinez@mail.com",
+  "password": "student123456"
+}
+
+###
+
+### Login student 19 (Pablo)
+POST {{authHost}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "pablo.rodriguez@mail.com",
+  "password": "student345678"
+}
+
+###
+
+### Registro tutor (siempre por Auth Service)
+### Nota: Degree (no Grade). Role: tutor
+POST {{authHost}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Tutor Demo",
+  "email": "tutor.demo@mail.com",
+  "password": "TutorDemo123!",
+  "age": 40,
+  "genre": "M",
+  "country": "MX",
+  "role": "tutor",
+  "degree": "maestria"
+}
+
+###
+
+### Registro estudiante (siempre por Auth Service)
+### Nota: si luego quieres asignarlo, usa /tutors/assign-student con JWT de tutor
+POST {{authHost}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Student Demo",
+  "email": "student.demo@mail.com",
+  "password": "StudentDemo123!",
+  "age": 14,
+  "genre": "F",
+  "country": "MX",
+  "role": "student",
+  "neurodivergency": "ADHD"
+}
+
+###
+
+### Asignar estudiante a tutor (requiere JWT de ese tutor)
+@tutor47Token = <PEGAR_TOKEN_TUTOR_47>
+POST {{figuresHost}}/tutors/assign-student
+Authorization: Bearer {{tutor47Token}}
+Content-Type: application/json
+
+{
+  "studentEmail": "student.demo@mail.com",
+  "tutorEmail": "juan.garcia@mail.com"
+}
+

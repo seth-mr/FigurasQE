@@ -1,0 +1,307 @@
+{
+  "info": {
+    "_postman_id": "acf9ed9f-8ce5-4ea1-8f52-a58bd65711d2",
+    "name": "FQE Gateway",
+    "description": "Pruebas automatizadas del gateway: health local, health de upstreams, OpenAPI y comportamiento basico de proxys auth, data, logs y hands.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Gateway Health - local",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Identifica al gateway', function () {",
+              "  pm.expect(body.service).to.eql('gateway');",
+              "  pm.expect(body.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Health - auth upstream",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/health/auth"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Auth upstream esta arriba', function () {",
+              "  pm.expect(body.service).to.eql('auth');",
+              "  pm.expect(body.status).to.eql('ok');",
+              "  pm.expect(body.database).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Health - logs upstream",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/health/logs"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Logs upstream esta arriba', function () {",
+              "  pm.expect(body.service).to.eql('logs');",
+              "  pm.expect(body.status).to.eql('ok');",
+              "  pm.expect(body.mongo).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Health - rabbit listener upstream",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/health/rabbit-listener"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Listener upstream esta arriba', function () {",
+              "  pm.expect(body.service).to.eql('rabbit-mongo-listener');",
+              "  pm.expect(body.status).to.eql('ok');",
+              "  pm.expect(body.rabbitmq).to.eql('ok');",
+              "  pm.expect(body.mongo).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Health - servicio desconocido",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/health/unknown"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway OpenAPI",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/openapi.json"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Documento OpenAPI del gateway', function () {",
+              "  pm.expect(body.openapi).to.eql('3.0.3');",
+              "  pm.expect(body.info.title).to.eql('FigurasQE Gateway API');",
+              "  pm.expect(body.paths).to.have.property('/auth/login');",
+              "  pm.expect(body.paths).to.have.property('/health');",
+              "  pm.expect(body.paths).to.have.property('/hands');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Auth Proxy - login estudiante",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{gatewayBaseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Proxy auth entrega token y role student', function () {",
+              "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+              "  pm.expect(body.role).to.eql('student');",
+              "});",
+              "pm.collectionVariables.set('studentToken', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Data Proxy - students sin token",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/data/students"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 401 sin token', function () {",
+              "  pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Logs Proxy - listado",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/logs/api/logs?limit=2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Proxy logs entrega arreglo', function () {",
+              "  pm.expect(body).to.be.an('array');",
+              "  pm.expect(body.length).to.be.at.most(2);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Logs Proxy - filtro por servicio",
+      "request": {
+        "method": "GET",
+        "url": "{{gatewayBaseUrl}}/logs/api/logs/service/auth-service?limit=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Entrega arreglo filtrado', function () {",
+              "  pm.expect(body).to.be.an('array');",
+              "});",
+              "if (body.length > 0) {",
+              "  pm.test('Todos pertenecen a auth-service', function () {",
+              "    body.forEach((item) => pm.expect(item.service).to.eql('auth-service'));",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway Hands Proxy - sin imagen",
+      "request": {
+        "method": "POST",
+        "url": "{{gatewayBaseUrl}}/hands"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Regresa 400 cuando falta image', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('Mensaje esperado', function () {",
+              "  pm.expect(body.error).to.eql('No image provided');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "studentToken",
+      "value": ""
+    }
+  ]
+}

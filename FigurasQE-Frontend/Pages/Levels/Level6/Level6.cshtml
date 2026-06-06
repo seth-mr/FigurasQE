@@ -1,0 +1,122 @@
+@page
+@model Level6Model
+@{
+    ViewData["Title"] = "Nivel 6";
+    Layout = "_LevelLayout";
+
+}
+
+<video id="video" autoplay playsinline muted></video>
+<canvas id="canvas" style="display: none;"></canvas>
+
+<div id="counter-container" class="d-flex gap-3" style="position: relative; top: 24rem;">
+    <div id="counter-1" class="counter-circle rounded-circle bg-success-subtle"></div>
+    <div id="counter-2" class="counter-circle rounded-circle bg-success-subtle"></div>
+    <div id="counter-3" class="counter-circle rounded-circle bg-success-subtle"></div>
+</div>
+
+<div id="hands-container">
+
+    <div id="left-hand-container" class="d-flex gap-3">
+        <div id="left-1" class="finger-circle rounded-circle bg-primary-subtle"></div>
+        <div id="left-2" class="finger-circle rounded-circle bg-primary-subtle"></div>
+        <div id="left-3" class="finger-circle rounded-circle bg-primary-subtle"></div>
+        <div id="left-4" class="finger-circle rounded-circle bg-primary-subtle"></div>
+    </div>
+
+    <div id="right-hand-container" class="d-flex gap-3">
+        <div id="right-1" class="finger-circle rounded-circle bg-primary-subtle"></div>
+        <div id="right-2" class="finger-circle rounded-circle bg-primary-subtle"></div>
+        <div id="right-3" class="finger-circle rounded-circle bg-primary-subtle"></div>
+    </div>
+</div>
+
+<div style="position: fixed; bottom: 1rem; right: 1rem;">
+    <a asp-page="/Levels/LevelsCatalog" class="btn btn-primary">Niveles</a>
+</div>
+
+<div id="level-config"
+     data-next-level="@Model.NextLevelRoute"
+     data-total="@Model.Answer.Total"
+     data-left="@Model.Answer.Left"
+     data-right="@Model.Answer.Right">
+</div>
+
+<style>
+    body {
+        background-image: url('/img/SummerLevelBackWithSun.png');
+        background-size: cover;
+        background-position: center;
+        margin-bottom: 60px;
+    }
+
+    #video {
+        transform: scaleX(-1);
+        
+        position: fixed;
+        top: 4rem;
+
+        width: 25rem;
+        height: 18rem;
+
+        border-radius: 20px;
+        border: 5px solid white;
+
+        object-fit: cover;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        background-color: black;
+    }
+
+    #hands-container {
+        width: 100vw;
+        height: 100vh;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        padding-inline: 8rem;
+    }
+
+    #left-hand-container {
+        position: relative;
+        top: 14rem;
+        left: 2rem;
+    }
+    
+    #right-hand-container {
+        position: relative;
+        top: 16rem;
+        right: 2rem;
+    }
+
+    .finger-circle {
+        width: 8rem;
+        height: 8rem;
+        transition: all 0.2s ease;
+    }
+
+    .active-finger {
+        background-color: #0d6efd !important;
+        border: 5px solid #cfe2ff;
+        box-shadow: 
+            0 0 20px rgba(13,110,253,0.7),
+            0 0 40px rgba(13,110,253,0.5);
+        transform: scale(1.05);
+    }
+
+    .counter-circle {
+        width: 2rem;
+        height: 2rem;
+        transition: all 0.2s ease;
+    }
+
+    .active-counter {
+        background-color: #1dfd0d !important;
+        border: 5px solid #d9ffcf;
+        box-shadow: 
+            0 0 20px rgba(13,110,253,0.7),
+            0 0 40px rgba(13,110,253,0.5);
+        transform: scale(1.05);
+    }
+</style>

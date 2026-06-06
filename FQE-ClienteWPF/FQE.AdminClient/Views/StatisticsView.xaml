@@ -1,0 +1,209 @@
+<UserControl x:Class="FQE.AdminClient.Views.StatisticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="Transparent">
+    <Grid Margin="28">
+        <Border Padding="28"
+                Background="{StaticResource PanelBrush}"
+                CornerRadius="28">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Panel de estadisticas"
+                                       FontSize="30"
+                                       FontWeight="Bold" />
+                            <TextBlock Text="Resumen de estudiantes, tutores y actividad"
+                                       Margin="0,6,0,0"
+                                       Foreground="{StaticResource MutedBrush}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Width="120"
+                                Height="40"
+                                Content="Volver"
+                                Click="BackButton_Click" />
+                    </Grid>
+
+                    <UniformGrid Columns="4" Margin="0,20,0,0">
+                        <Border Background="#16314D" CornerRadius="16" Padding="14" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="Total registrados" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="TotalRegisteredText" FontSize="26" FontWeight="Bold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16314D" CornerRadius="16" Padding="14" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="Estudiantes" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="StudentsTotalText" FontSize="26" FontWeight="Bold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16314D" CornerRadius="16" Padding="14" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="Tutores" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="TutorsTotalText" FontSize="26" FontWeight="Bold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16314D" CornerRadius="16" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Prom. alumnos/tutor" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="AverageStudentsPerTutorText" FontSize="26" FontWeight="Bold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#0F1D2C" CornerRadius="20" Padding="16" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Genero estudiantes" FontSize="20" FontWeight="SemiBold" />
+                                <ItemsControl x:Name="StudentGenderItemsControl" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="45" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="1" Height="14" Background="#1F3B57" CornerRadius="7" Margin="8,0,8,0">
+                                                    <Border Width="{Binding BarWidth}" HorizontalAlignment="Left" Background="#38BDF8" CornerRadius="7" />
+                                                </Border>
+                                                <TextBlock Grid.Column="2" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#0F1D2C" CornerRadius="20" Padding="16" Margin="10,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Grado tutores" FontSize="20" FontWeight="SemiBold" />
+                                <ItemsControl x:Name="TutorDegreeItemsControl" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="45" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="1" Height="14" Background="#1F3B57" CornerRadius="7" Margin="8,0,8,0">
+                                                    <Border Width="{Binding BarWidth}" HorizontalAlignment="Left" Background="#34D399" CornerRadius="7" />
+                                                </Border>
+                                                <TextBlock Grid.Column="2" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#0F1D2C" CornerRadius="20" Padding="16" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Neurodivergencia estudiantes" FontSize="20" FontWeight="SemiBold" />
+                                <ItemsControl x:Name="StudentNeuroItemsControl" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="130" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="45" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="1" Height="14" Background="#1F3B57" CornerRadius="7" Margin="8,0,8,0">
+                                                    <Border Width="{Binding BarWidth}" HorizontalAlignment="Left" Background="#A78BFA" CornerRadius="7" />
+                                                </Border>
+                                                <TextBlock Grid.Column="2" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="#0F1D2C" CornerRadius="20" Padding="16" Margin="10,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Genero tutores" FontSize="20" FontWeight="SemiBold" />
+                                <ItemsControl x:Name="TutorGenderItemsControl" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="45" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                                <Border Grid.Column="1" Height="14" Background="#1F3B57" CornerRadius="7" Margin="8,0,8,0">
+                                                    <Border Width="{Binding BarWidth}" HorizontalAlignment="Left" Background="#F59E0B" CornerRadius="7" />
+                                                </Border>
+                                                <TextBlock Grid.Column="2" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <UniformGrid Columns="5" Margin="0,20,0,0">
+                        <Border Background="#16000000" CornerRadius="16" Padding="12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Hoy" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="RegisteredTodayText" FontSize="20" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16000000" CornerRadius="16" Padding="12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Semana" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="RegisteredWeekText" FontSize="20" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16000000" CornerRadius="16" Padding="12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Mes" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="RegisteredMonthText" FontSize="20" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16000000" CornerRadius="16" Padding="12" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="Horas jugadas" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="HoursPlayedText" FontSize="20" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#16000000" CornerRadius="16" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="Niveles superados" Foreground="{StaticResource MutedBrush}" />
+                                <TextBlock x:Name="LevelsSuperadosText" FontSize="20" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

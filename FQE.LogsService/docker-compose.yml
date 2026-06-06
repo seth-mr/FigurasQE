@@ -1,0 +1,18 @@
+services:
+  logs-service:
+    build:
+      context: .
+    container_name: fqe-logs-service
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5186
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI_DOCKER:?Set MONGO_URI_DOCKER in .env}
+      MONGO_DATABASE: logsdb
+      MONGO_COLLECTION: events
+      DEFAULT_LIMIT: 200
+      MAX_LIMIT: 1000
+      POLL_INTERVAL_MS: 1000
+    ports:
+      - "5186:5186"

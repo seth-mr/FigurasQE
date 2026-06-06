@@ -1,0 +1,129 @@
+@page
+@model HomeModel
+@{
+    ViewData["Title"] = "Panel del tutor";
+    Layout = "_LayoutNoHeader";
+}
+
+<section class="tutor-dashboard">
+    <div class="tutor-hero">
+        <div>
+            <p class="eyebrow">Panel del tutor</p>
+            <h1>Bienvenido @Model.Tutor.Name</h1>
+            <p>Consulta tu perfil, registra alumnos por correo y revisa el avance de cada estudiante.</p>
+        </div>
+        <div class="hero-actions">
+            <a asp-page="/Tutor/Profile" class="btn btn-light">Ver mis datos</a>
+            <a asp-page="/User/Logout" class="btn btn-outline-light">Cerrar sesión</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <div class="tutor-grid">
+        <article class="panel-card tutor-summary">
+            <div>
+                <p class="eyebrow">Tu vitrina profesional</p>
+                <h2>@Model.Tutor.Name</h2>
+            </div>
+            <dl class="summary-list">
+                <div>
+                    <dt>Email</dt>
+                    <dd>@Model.Tutor.Email</dd>
+                </div>
+                <div>
+                    <dt>País</dt>
+                    <dd>@Model.FormatCountry(Model.Tutor.Country)</dd>
+                </div>
+                <div>
+                    <dt>Género</dt>
+                    <dd>@Model.FormatGender(Model.Tutor.Gender)</dd>
+                </div>
+                <div>
+                    <dt>Edad</dt>
+                    <dd>@Model.FormatAge(Model.Tutor.Age)</dd>
+                </div>
+                <div>
+                    <dt>Grado</dt>
+                    <dd>@Model.FormatDegree(Model.Tutor.Degree)</dd>
+                </div>
+            </dl>
+            <div class="student-count">
+                <span>@Model.Students.Count</span>
+                <p>@(Model.Students.Count == 1 ? "alumno asignado" : "alumnos asignados")</p>
+            </div>
+        </article>
+
+        <article class="panel-card assign-card">
+            <div>
+                <p class="eyebrow">Registrar alumno</p>
+                <h2>Asignar por correo</h2>
+                <p>El alumno debe existir como estudiante; al enviarlo quedará asociado a tu perfil.</p>
+            </div>
+            @if (Model.HasAssignmentFeedback)
+            {
+                <div class="inline-feedback @(Model.IsAssignmentFeedbackError ? "inline-feedback-error" : "inline-feedback-success")"
+                     data-autohide="true"
+                     role="status"
+                     aria-live="polite">
+                    @Model.AssignmentFeedbackMessage
+                </div>
+            }
+            <form method="post" asp-page-handler="AssignStudent" class="assign-form">
+                <label asp-for="StudentEmail" class="form-label">Correo del alumno</label>
+                <input asp-for="StudentEmail" class="form-control" type="email" placeholder="alumno@correo.com" />
+                <button type="submit" class="btn btn-success w-100">Asignar alumno</button>
+            </form>
+        </article>
+    </div>
+
+    <article class="panel-card students-panel">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Tus alumnos</p>
+                <h2>Lista de estudiantes</h2>
+            </div>
+            <span class="pill">@Model.Students.Count</span>
+        </div>
+
+        @if (Model.Students.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>Todavía no tienes alumnos asignados.</h3>
+                <p>Cuando registres un correo válido, aparecerán aquí con su resumen.</p>
+            </div>
+        }
+        else
+        {
+            <div class="student-list">
+                @foreach (var student in Model.Students)
+                {
+                    var isNeurodivergent = Model.IsNeurodivergent(student.Neurodivergency);
+                    <a asp-page="/Tutor/StudentDetail" asp-route-id="@student.IdStudent" class="student-card @Model.GetGenderCardClass(student.Gender)">
+                        <div class="student-avatar">@Model.GetInitials(student.Name)</div>
+                        <div class="student-main">
+                            <div>
+                                <h3>@(string.IsNullOrWhiteSpace(student.Name) ? "Alumno sin nombre" : student.Name)</h3>
+                                <p>Edad @student.Age</p>
+                            </div>
+                            <div class="chips">
+                                <span class="chip">@Model.FormatGender(student.Gender.ToString())</span>
+                                <span class="chip @(isNeurodivergent ? "chip-warm" : "chip-cool")">
+                                    @(isNeurodivergent ? "Neurodivergente" : "No neurodivergente")
+                                </span>
+                                @if (isNeurodivergent)
+                                {
+                                    <span class="chip">@student.Neurodivergency</span>
+                                }
+                            </div>
+                        </div>
+                        <span class="open-indicator">Ver</span>
+                    </a>
+                }
+            </div>
+        }
+    </article>
+</section>

@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "FQE RabbitMongo Listener API",
+    "version": "1.0.0",
+    "description": "API para monitoreo y health del listener de RabbitMQ a MongoDB."
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Devuelve el estado de salud del listener.",
+        "responses": {
+          "200": {
+            "description": "Servicio saludable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": { "type": "string" },
+                    "status": { "type": "string" },
+                    "rabbitmq": { "type": "string" },
+                    "mongo": { "type": "string" },
+                    "uptimeSeconds": { "type": "integer" },
+                    "reconnectDelayMs": { "type": "integer" },
+                    "startedAt": { "type": "string" },
+                    "lastError": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio degradado o caído"
+          }
+        }
+      }
+    }
+  }
+}

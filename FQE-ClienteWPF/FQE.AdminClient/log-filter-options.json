@@ -1,0 +1,29 @@
+{
+  "services": [
+    "auth-service",
+    "FiguerasQueEnse-anBD",
+    "fingers-service",
+    "FigurasQE-Gateway"
+  ],
+  "types": [
+    "error",
+    "success"
+  ],
+  "entityTypes": [
+    "admin",
+    "student",
+    "tutor"
+  ],
+  "actions": [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE"
+  ],
+  "statusClasses": [
+    "2xx",
+    "4xx",
+    "5xx"
+  ]
+}

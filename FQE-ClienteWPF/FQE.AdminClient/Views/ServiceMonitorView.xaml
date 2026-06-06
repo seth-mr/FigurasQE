@@ -1,0 +1,195 @@
+<UserControl x:Class="FQE.AdminClient.Views.ServiceMonitorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="Transparent">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="HealthyHeartbeatBrush" Color="#22C55E" />
+        <SolidColorBrush x:Key="UnhealthyHeartbeatBrush" Color="#DC2626" />
+        <SolidColorBrush x:Key="NeutralHeartbeatBrush" Color="#64748B" />
+
+        <Style x:Key="MonitorStatusIndicatorStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="Opacity" Value="0.9" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0.55"
+                                             To="1"
+                                             Duration="0:0:0.7" />
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                             From="1"
+                                             To="1.3"
+                                             Duration="0:0:0.7" />
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                             From="1"
+                                             To="1.3"
+                                             Duration="0:0:0.7" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SecondaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#2A4058" />
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        </Style>
+
+        <Style x:Key="VerifyStateButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryActionButtonStyle}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="Tag" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="28">
+        <Border Padding="28"
+                Background="{StaticResource PanelBrushAlt}"
+                CornerRadius="28">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Monitoreo de servicios"
+                                   FontSize="28"
+                                   FontWeight="Bold" />
+                   
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Width="120"
+                            Height="40"
+                            Margin="12,0,0,0"
+                            Content="Volver"
+                            Style="{StaticResource SecondaryActionButtonStyle}"
+                            Click="BackButton_Click" />
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,22,0,0"
+                        Padding="22"
+                        Background="#16000000"
+                        CornerRadius="22">
+                    <TextBlock Foreground="{StaticResource MutedBrush}"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Text="Cada tarjeta representa un microservicio conocido ten cuidado " />
+                </Border>
+
+                <ScrollViewer Grid.Row="2"
+                              Margin="0,24,0,0"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="ServicesItemsControl">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="330"
+                                        Margin="0,0,18,18"
+                                        Padding="20"
+                                        Background="{StaticResource PanelBrush}"
+                                        CornerRadius="24">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Style="{StaticResource MonitorStatusIndicatorStyle}"
+                                                     Fill="{Binding HeartbeatBrush}" />
+                                            <StackPanel Margin="10,0,0,0">
+                                                <TextBlock FontSize="20"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding Name}" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           Foreground="{StaticResource MutedBrush}"
+                                                           Text="{Binding HeartbeatText}" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Border Grid.Row="1"
+                                                Margin="0,18,0,0"
+                                                Padding="14,12"
+                                                Background="#0F1D2C"
+                                                CornerRadius="16">
+                                            <StackPanel>
+                                                <TextBlock Foreground="{StaticResource MutedBrush}"
+                                                           Text="Ruta actual" />
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding Route}" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <TextBlock Grid.Row="2"
+                                                   Margin="0,16,0,0"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding Description}" />
+
+                                        <TextBlock Grid.Row="2"
+                                                   Margin="0,62,0,0"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding HeartbeatSummary}" />
+
+                                        <UniformGrid Grid.Row="3"
+                                                     Margin="0,18,0,0"
+                                                     Columns="2">
+                                            <Button Margin="0,0,10,10"
+                                                Content="Ver detalles"
+                                                ToolTip="Muestra el detalle del heartbeat y permite ajustar su intervalo."
+                                                Click="ViewDetailsButton_Click" />
+                                            <Button Margin="0,0,0,10"
+                                                    Content="Verificar estado"
+                                                    Style="{StaticResource VerifyStateButtonStyle}"
+                                                    ToolTip="Verifica el estado via gateway"
+                                                    Tag="{Binding Route}"
+                                                    Click="VerifyStateButton_Click" />
+                                        </UniformGrid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

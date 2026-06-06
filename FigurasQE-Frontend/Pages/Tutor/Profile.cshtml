@@ -1,0 +1,140 @@
+@page
+@model ProfileModel
+@{
+    ViewData["Title"] = "Perfil";
+    Layout = "_LayoutNoHeader";
+}
+
+@using System.Text.Json
+
+<div class="container py-4">
+    <form method="post" class="bg-white p-4 rounded shadow mx-auto" style="max-width: 650px;">
+
+        <h2 class="mb-4 text-center">Perfil de @Model.Tutor.Name</h2>
+
+        <input type="hidden" asp-for="Tutor.IdTutor" />
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input asp-for="Tutor.Name" class="form-control" placeholder="Nombre" />
+                    <label asp-for="Tutor.Name">Nombre</label>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input asp-for="Tutor.Email" type="email" class="form-control" placeholder="Email" />
+                    <label asp-for="Tutor.Email"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">
+                Edad: <span id="ageLabel">@Model.Tutor.Age</span>
+            </label>
+
+            <input asp-for="Tutor.Age" type="range" class="form-range" min="1" max="85" step="1" id="age" />
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Género</label>
+                <select asp-for="Tutor.Gender" class="form-select" asp-items="Model.Genres">
+                    <option value="">Selecciona tu Género</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">País</label>
+                <select asp-for="Tutor.Country" class="form-select" asp-items="Model.Countries">
+                    <option value="">Selecciona un país</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Grado</label>
+            <select asp-for="Tutor.Degree" class="form-select" asp-items="Model.Grades">
+                <option value="">Selecciona una opción</option>
+            </select>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary mb-2">
+                Guardar cambios
+            </button>
+            <a asp-page="/Tutor/Home" class="btn btn-secondary
+            
+            ">Regresar</a>
+        </div>
+
+    </form>
+</div>
+
+<!-- ERROR MODAL -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Error</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="errorMessage"></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">¡Éxito!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="successMessage"></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const range = document.getElementById("age");
+            const label = document.getElementById("ageLabel");
+
+            const update = () => {
+                label.textContent = range.value + " años";
+            };
+
+            update();
+            range.addEventListener("input", update);
+
+            const errorMessage = "@Model.ErrorMessage";
+
+            if (errorMessage && errorMessage.trim() !== "") {
+                document.getElementById("errorMessage").textContent = errorMessage;
+                new bootstrap.Modal(document.getElementById("errorModal")).show();
+            }
+
+            const successMessage = "@Model.SuccessMessage";
+            if (successMessage && successMessage.trim() !== "") {
+                document.getElementById("successMessage").textContent = successMessage;
+                new bootstrap.Modal(document.getElementById("successModal")).show();
+            }
+
+        });
+    </script>
+}

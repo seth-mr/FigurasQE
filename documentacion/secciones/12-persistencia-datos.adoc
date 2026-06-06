@@ -1,0 +1,321 @@
+== Persistencia de Datos
+
+El sistema utiliza dos mecanismos principales de persistencia: una base de datos relacional en PostgreSQL y una base de datos no relacional en MongoDB. Ambas se ejecutan en contenedores Docker dentro del entorno local del proyecto y cumplen funciones diferentes dentro de la arquitectura.
+
+PostgreSQL se utiliza para almacenar la informacion estructural y principal del dominio educativo, como usuarios, tutores, estudiantes, sesiones, niveles y resultados. MongoDB se utiliza para almacenar eventos y logs generados por los servicios, permitiendo conservar informacion operativa con una estructura mas flexible.
+
+En el entorno revisado, PostgreSQL se encuentra montado en el contenedor Docker `postgres-db`, mientras que MongoDB se encuentra montado en el contenedor `mongo-logs`.
+
+=== Base de Datos Relacional: PostgreSQL
+
+La base de datos PostgreSQL corresponde a la persistencia principal del sistema. En ella se almacena la informacion que requiere integridad, relaciones claras entre entidades y consistencia en las operaciones.
+
+[cols="1,2", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Motor
+| PostgreSQL
+
+| Contenedor Docker
+| `postgres-db`
+
+| Base de datos
+| `figurasqe`
+
+| Uso principal
+| Persistencia de usuarios, roles, estudiantes, tutores, sesiones, niveles y resultados.
+
+| Servicios que la utilizan
+| Servicio de autenticacion y microservicio principal de datos.
+|===
+
+==== Funcion Dentro del Sistema
+
+PostgreSQL se utiliza para guardar los datos centrales de la aplicacion. Su funcion principal es mantener informacion consistente y relacionada entre los distintos elementos del sistema.
+
+Entre las entidades principales se encuentran:
+
+* `admins`: usuarios administradores del sistema.
+* `students`: estudiantes que utilizan la aplicacion.
+* `tutors`: tutores, profesores o responsables asociados a estudiantes.
+* `sessions`: sesiones de uso registradas por estudiante.
+* `levels`: niveles o actividades disponibles.
+* `level_results`: resultados obtenidos por los estudiantes en cada nivel.
+
+Estas entidades mantienen relaciones entre si. Por ejemplo, un tutor puede estar asociado a varios estudiantes; un estudiante puede tener varias sesiones; y una sesion puede tener varios resultados de niveles. Este tipo de estructura requiere un modelo relacional para representar llaves primarias, llaves foraneas, restricciones e integridad referencial.
+
+==== Diagrama PlantUML de la Base de Datos PostgreSQL
+
+El siguiente diagrama representa la estructura real de la base de datos `figurasqe` consultada desde PostgreSQL. Se muestran las tablas principales del dominio, sus tipos de datos, llaves primarias, llaves foraneas y relaciones.
+
+[plantuml,postgresql-architecture,png]
+----
+@startuml
+title Modelo Relacional de la Base de Datos PostgreSQL - figurasqe
+
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classAttributeFontSize 10
+skinparam noteFontSize 10
+hide circle
+
+entity "admins" as admins {
+  * id_admin : integer <<PK>>
+  --
+  name : varchar(120) <<NN>>
+  email : varchar(120) <<NN>>
+  phone : varchar(20) <<NN>>
+  username : varchar(60) <<NN>>
+  password_hash : varchar(255) <<NN>>
+  registration_date : timestamp
+}
+
+entity "tutors" as tutors {
+  * id_tutor : integer <<PK>>
+  --
+  email : varchar(120) <<NN>>
+  password_hash : varchar(255) <<NN>>
+  country : char(2)
+  registration_date : timestamp
+  name : varchar(120)
+  gender : char(1)
+  age : integer
+  degree : varchar(20)
+}
+
+entity "students" as students {
+  * id_student : integer <<PK>>
+  --
+  id_tutor : integer <<FK>>
+  age : integer <<NN>>
+  gender : char(1) <<NN>>
+  country : char(2)
+  neurodivergency : varchar(50)
+  registration_date : timestamp
+  email : varchar(120)
+  password_hash : varchar(255)
+  name : varchar(120)
+}
+
+entity "sessions" as sessions {
+  * id_session : integer <<PK>>
+  --
+  id_student : integer <<FK, NN>>
+  beginning_date : timestamp
+  end_date : timestamp
+  device : varchar(50)
+}
+
+entity "levels" as levels {
+  * id_level : integer <<PK>>
+  --
+  name : varchar(100)
+  difficulty : integer
+}
+
+entity "level_results" as level_results {
+  * id_result : integer <<PK>>
+  --
+  id_session : integer <<FK, NN>>
+  id_level : integer <<FK, NN>>
+  finishing_time : integer
+  attempts : integer
+  fails : integer
+  completed : boolean
+}
+
+tutors ||--o{ students : "id_tutor"
+students ||--o{ sessions : "id_student"
+sessions ||--o{ level_results : "id_session"
+levels ||--o{ level_results : "id_level"
+
+@enduml
+----
+
+Restricciones relevantes detectadas en PostgreSQL:
+
+* `admins.email` y `admins.username` tienen indices unicos.
+* `tutors.email` tiene indice unico.
+* `students.id_tutor` es una llave foranea nullable; por lo tanto, un estudiante puede existir sin tutor asignado.
+* `students.gender` acepta los valores `M`, `F` u `O`.
+* `tutors.gender` acepta los valores `M`, `F` u `O`.
+* `tutors.degree` acepta los valores `licenciatura`, `maestria`, `doctorado`, `postdoctorado` o `padre-madre`.
+* Las tablas `tutors`, `students`, `sessions`, `levels` y `level_results` usan secuencias para generar sus identificadores.
+
+==== Justificacion del Modelo Relacional
+
+PostgreSQL es adecuado para la informacion principal del sistema porque los datos tienen estructura definida y relaciones importantes. Los estudiantes, tutores, sesiones, niveles y resultados no son elementos aislados: dependen unos de otros y deben mantener coherencia.
+
+El modelo relacional permite:
+
+* Definir llaves primarias para identificar cada registro.
+* Usar llaves foraneas para representar relaciones entre entidades.
+* Evitar inconsistencias, como resultados asociados a sesiones inexistentes.
+* Consultar informacion relacionada, por ejemplo estudiantes de un tutor o resultados de una sesion.
+* Mantener reglas de integridad sobre usuarios, correos, sesiones y resultados.
+
+Por estas razones, PostgreSQL se utiliza para los datos estructurados y criticos del dominio educativo.
+
+=== Base de Datos No Relacional: MongoDB
+
+MongoDB se utiliza como base de datos documental para almacenar logs y eventos generados por los servicios. A diferencia de la informacion principal del sistema, los logs pueden variar en estructura, contener metadatos diferentes y crecer continuamente conforme los servicios generan actividad.
+
+En el entorno local revisado, MongoDB se ejecuta en Docker dentro del contenedor `mongo-logs`. La base de datos utilizada es `logsdb` y la coleccion principal es `events`.
+
+[cols="1,2", options="header"]
+|===
+| Elemento
+| Descripcion
+
+| Motor
+| MongoDB
+
+| Contenedor Docker
+| `mongo-logs`
+
+| Base de datos
+| `logsdb`
+
+| Coleccion principal
+| `events`
+
+| Uso principal
+| Persistencia de eventos, logs, errores, actividad tecnica y metadatos de mensajeria.
+
+| Servicios que la utilizan
+| Logs Service y RabbitMQ Mongo Listener.
+|===
+
+==== Funcion Dentro del Sistema
+
+MongoDB se encarga de almacenar informacion operativa y eventos del sistema. Los servicios pueden generar mensajes relacionados con actividad, errores, rutas consultadas, tiempos de respuesta, entidades involucradas o acciones realizadas.
+
+El listener de RabbitMQ consume mensajes de una cola configurada, intenta interpretarlos como JSON y los guarda en MongoDB. Si el mensaje no tiene formato JSON valido, lo conserva como texto crudo mediante el campo `rawMessage`. Tambien puede agregar metadatos de RabbitMQ, como `deliveryTag`, `exchange`, `routingKey` y `redelivered`.
+
+El servicio de logs consulta esta informacion desde MongoDB y la expone mediante endpoints HTTP y WebSocket, permitiendo al cliente administrativo revisar logs recientes, filtrarlos y consultar eventos del sistema.
+
+==== Ejemplo de Documento de Log
+
+[source,json]
+----
+{
+  "service": "gateway",
+  "route": "/data/students",
+  "statusCode": 200,
+  "durationMs": 45,
+  "timestamp": "2026-05-21T20:30:00.000Z",
+  "type": "event",
+  "entityType": "student",
+  "entityId": 12,
+  "action": "query_students",
+  "receivedAtUtc": "2026-05-21T20:30:01.000Z",
+  "rabbitMetadata": {
+    "exchange": "fqe.logs",
+    "routingKey": "logs.gateway",
+    "redelivered": false
+  }
+}
+----
+
+==== Estructura Detectada en MongoDB
+
+La coleccion `events` contiene documentos de logs con campos orientados a registrar actividad tecnica y operativa. La estructura detectada incluye:
+
+* `_id`: identificador automatico del documento.
+* `service`: nombre del servicio que genero el evento.
+* `type`: tipo de evento, por ejemplo `success`, `error` o `event`.
+* `message`: mensaje descriptivo del evento.
+* `entityType`: tipo de entidad relacionada, por ejemplo `student`, `tutor`, `admin` o `null`.
+* `entityId`: identificador de la entidad relacionada, cuando aplica.
+* `action`: accion o metodo asociado al evento, por ejemplo `GET`, `POST` o `PUT`.
+* `route`: ruta HTTP relacionada con el evento.
+* `statusCode`: codigo HTTP de respuesta.
+* `durationMs`: duracion de la solicitud en milisegundos.
+* `timestamp`: fecha y hora del evento.
+* `receivedAtUtc`: fecha y hora en que el evento fue recibido y almacenado.
+* `rabbitMetadata`: objeto con metadatos de RabbitMQ.
+
+La coleccion tambien cuenta con indices para acelerar consultas por fecha y filtros frecuentes:
+
+* `_id_`
+* `timestamp_-1`
+* `service_1_timestamp_-1`
+* `type_1_timestamp_-1`
+* `entityType_1_timestamp_-1`
+
+==== Diagrama PlantUML de MongoDB
+
+[plantuml,mongodb-architecture,png]
+----
+@startuml
+title Estructura de la Base de Datos MongoDB - logsdb
+
+skinparam linetype ortho
+skinparam packageStyle rectangle
+hide circle
+
+package "Base de datos: logsdb" as LogsDb {
+  class "Coleccion: events" as Events
+}
+
+class "events document" as EventDocument {
+  _id : ObjectId
+  service : string
+  type : string
+  message : string
+  entityType : string | null
+  entityId : number | null
+  action : string
+  route : string
+  statusCode : number
+  durationMs : number
+  timestamp : date | string
+  receivedAtUtc : date
+}
+
+class "rabbitMetadata" as RabbitMetadata {
+  deliveryTag : number
+  exchange : string
+  routingKey : string
+  redelivered : boolean
+}
+
+class "indices events" as EventIndexes {
+  _id_ : _id asc
+  timestamp_-1 : timestamp desc
+  service_1_timestamp_-1 : service asc, timestamp desc
+  type_1_timestamp_-1 : type asc, timestamp desc
+  entityType_1_timestamp_-1 : entityType asc, timestamp desc
+}
+
+Events o-- EventDocument : almacena documentos
+EventDocument *-- RabbitMetadata : rabbitMetadata
+Events .. EventIndexes : indices
+
+note right of RabbitMetadata
+  Metadatos agregados por el
+  listener al consumir mensajes
+  de RabbitMQ.
+end note
+
+@enduml
+----
+
+==== Justificacion del Modelo No Relacional
+
+MongoDB es adecuado para logs y eventos porque esta informacion no siempre tiene una estructura fija. Un log puede incluir ruta, codigo de estado y duracion; otro puede incluir metadatos de RabbitMQ; otro puede representar un error; y otro puede llegar como mensaje crudo.
+
+El modelo documental permite:
+
+* Guardar eventos con campos variables sin modificar un esquema rigido.
+* Almacenar documentos JSON de forma natural.
+* Registrar metadatos adicionales conforme evolucionan los servicios.
+* Consultar rapidamente eventos recientes y filtrarlos por servicio, tipo, ruta o accion.
+* Separar la informacion operativa de los datos principales del dominio educativo.
+
+Por estas razones, MongoDB se utiliza para informacion flexible, tecnica y orientada a eventos, mientras que PostgreSQL conserva los datos estructurados y relacionales del sistema.

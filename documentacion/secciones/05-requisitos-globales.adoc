@@ -1,0 +1,182 @@
+== Requisitos Globales del Sistema
+
+Esta seccion define los requisitos generales de Figuras Que Ensenan como sistema completo. No describe todavia los requisitos particulares de cada microservicio, sino las capacidades y cualidades que debe cumplir la plataforma considerando todos sus componentes: clientes, gateway, servicios backend, deteccion de manos, bases de datos, mensajeria, logs y modulo administrativo.
+
+=== Requisitos Funcionales Globales
+
+[cols="1,3,1", options="header"]
+|===
+| ID
+| Requisito
+| Prioridad
+
+| RF-G-01
+| El sistema debe permitir el registro de usuarios con rol de estudiante o tutor, solicitando los datos necesarios segun el tipo de usuario.
+| Alta
+
+| RF-G-02
+| El sistema debe permitir el inicio de sesion de estudiantes, tutores y administradores mediante credenciales validas.
+| Alta
+
+| RF-G-03
+| El sistema debe generar y utilizar tokens de autenticacion para identificar el usuario activo y su rol dentro de la plataforma.
+| Alta
+
+| RF-G-04
+| El sistema debe dirigir a cada usuario hacia las funcionalidades correspondientes a su rol: estudiante, tutor o administrador.
+| Alta
+
+| RF-G-05
+| El sistema debe permitir que un estudiante consulte su informacion personal, su tutor asignado, sus sesiones y sus resultados de actividad.
+| Alta
+
+| RF-G-06
+| El sistema debe permitir que un tutor consulte su perfil y la lista de estudiantes asociados a su cuenta.
+| Alta
+
+| RF-G-07
+| El sistema debe permitir que un tutor asigne o vincule estudiantes a su cuenta mediante informacion de identificacion, como el correo del estudiante.
+| Alta
+
+| RF-G-08
+| El sistema debe permitir que un tutor consulte el detalle de cada estudiante asignado, incluyendo informacion personal, sesiones registradas y resultados obtenidos.
+| Alta
+
+| RF-G-09
+| El sistema debe registrar sesiones de uso asociadas a estudiantes, incluyendo datos como fecha de inicio, fecha de termino y dispositivo utilizado.
+| Alta
+
+| RF-G-10
+| El sistema debe registrar resultados de niveles o actividades, incluyendo intentos, fallos, tiempo de finalizacion y estado de completado.
+| Alta
+
+| RF-G-11
+| El sistema debe permitir consultar niveles, sesiones y resultados para dar seguimiento al progreso educativo de los estudiantes.
+| Media
+
+| RF-G-12
+| El sistema debe permitir que el administrador inicie sesion en un cliente administrativo independiente.
+| Alta
+
+| RF-G-13
+| El sistema debe permitir que el administrador consulte estadisticas generales sobre estudiantes, tutores, administradores, registros, actividad, horas jugadas y niveles superados.
+| Alta
+
+
+| RF-G-15
+| El sistema debe exponer un gateway como punto de entrada para centralizar la comunicacion entre clientes y servicios internos.
+| Alta
+
+| RF-G-16
+| El sistema debe redirigir solicitudes de autenticacion, datos, logs, salud y otros modulos hacia los servicios correspondientes.
+| Alta
+
+| RF-G-17
+| El sistema debe publicar y almacenar eventos o logs relevantes generados por los servicios.
+| Media
+
+| RF-G-18
+| El sistema debe permitir consultar logs del sistema para revisar actividad, errores o eventos importantes.
+| Media
+
+| RF-G-19
+| El sistema debe permitir el monitoreo basico del estado de los servicios mediante endpoints de salud.
+| Media
+
+| RF-G-20
+| El sistema debe permitir el acceso desde diferentes clientes, incluyendo aplicacion web, aplicacion Android y cliente administrativo WPF.
+| Alta
+
+| RF-G-21
+| El sistema debe permitir enviar imagenes al Gateway para obtener el conteo de dedos mediante el servicio de deteccion de manos.
+| Alta
+|===
+
+=== Requisitos No Funcionales Globales
+
+[cols="1,3,1", options="header"]
+|===
+| ID
+| Requisito
+| Prioridad
+
+| RNF-G-01
+| El sistema debe proteger el acceso a la informacion mediante autenticacion y autorizacion basada en roles.
+| Alta
+
+| RNF-G-02
+| El sistema debe garantizar que los estudiantes solo accedan a su propia informacion y que los tutores solo accedan a estudiantes asociados a su cuenta.
+| Alta
+
+| RNF-G-03
+| El sistema debe restringir las funciones administrativas a usuarios con rol de administrador.
+| Alta
+
+| RNF-G-04
+| El sistema debe manejar contrasenas de forma segura, evitando almacenar contrasenas en texto plano.
+| Alta
+
+| RNF-G-05
+| El sistema debe mantener una arquitectura modular basada en clientes, gateway, servicios backend, bases de datos y componentes de mensajeria.
+| Alta
+
+| RNF-G-06
+| El sistema debe permitir que sus componentes se ejecuten de forma independiente para facilitar mantenimiento, pruebas y despliegue.
+| Media
+
+| RNF-G-07
+| El sistema debe ofrecer una interfaz clara, sencilla y accesible para ninos con habilidades lectoras en desarrollo.
+| Alta
+
+| RNF-G-08
+| El sistema debe evitar interfaces saturadas para el estudiante y favorecer estimulos visuales claros, retroalimentacion positiva e interacciones comprensibles.
+| Alta
+
+| RNF-G-09
+| El sistema debe responder de forma adecuada ante errores, devolviendo mensajes comprensibles y estados HTTP consistentes en sus APIs.
+| Media
+
+| RNF-G-10
+| El sistema debe registrar eventos relevantes para facilitar auditoria, monitoreo y analisis tecnico.
+| Media
+
+| RNF-G-11
+| El sistema debe permitir consultar el estado de servicios criticos para detectar fallas o indisponibilidad.
+| Media
+
+| RNF-G-12
+| El sistema debe usar variables de entorno o archivos de configuracion para manejar datos sensibles como cadenas de conexion, secretos JWT y URLs de servicios.
+| Alta
+
+| RNF-G-13
+| El sistema no debe documentar ni exponer credenciales reales en archivos publicos de documentacion.
+| Alta
+
+| RNF-G-14
+| El sistema debe permitir persistencia de datos educativos, usuarios, sesiones y resultados en una base de datos principal.
+| Alta
+
+| RNF-G-15
+| El sistema debe permitir persistencia de logs y eventos en una base de datos documental cuando corresponda.
+| Media
+
+| RNF-G-16
+| El sistema debe poder ejecutarse en un entorno local de desarrollo con dependencias como Node.js, .NET, MongoDB, RabbitMQ y base de datos relacional.
+| Media
+
+| RNF-G-17
+| El sistema debe facilitar su crecimiento futuro, permitiendo agregar nuevos niveles, nuevas metricas, nuevos clientes o nuevos servicios.
+| Media
+
+| RNF-G-18
+| El sistema debe mantener separadas las responsabilidades entre autenticacion, datos del dominio, gateway, deteccion de manos, logs y clientes.
+| Alta
+|===
+
+=== Reglas de Negocio Globales
+
+* El estudiante solo puede consultar y modificar informacion asociada a su propio identificador.
+* El tutor solo puede consultar informacion de estudiantes que esten asociados a su cuenta.
+* El tutor solo puede consultar sesiones y resultados de estudiantes asignados.
+* Las funciones administrativas requieren rol de administrador.
+* El acceso a datos se controla mediante tokens JWT y validacion de rol.

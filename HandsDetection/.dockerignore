@@ -1,0 +1,12 @@
+.git
+__pycache__/
+*.pyc
+.venv/
+venv/
+hand_landmarker.task
+fingers_pb2.py
+fingers_pb2_grpc.py
+Dockerfile
+docker-compose.yml
+README-Docker.md
+rebuild-docker.ps1

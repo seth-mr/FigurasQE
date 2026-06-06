@@ -1,0 +1,191 @@
+== Microservicios del Sistema
+
+El proyecto se organiza en varios microservicios que separan responsabilidades del backend. Esta separacion permite que la autenticacion, la gestion de datos, la consulta de logs, la integracion por mensajeria y el acceso unificado desde clientes funcionen como piezas independientes, cada una con una funcion especifica dentro del sistema.
+
+En esta seccion no se consideran los clientes de usuario, como la aplicacion web, la aplicacion WPF o la aplicacion Android. El enfoque se centra solamente en los servicios backend que exponen APIs, documentacion Swagger o endpoints tecnicos de consulta.
+
+=== API Gateway
+
+El API Gateway funciona como punto de entrada unificado para las operaciones principales del sistema. Su responsabilidad es recibir solicitudes de los clientes, redirigirlas hacia los servicios correspondientes y presentar una interfaz centralizada para autenticacion, datos, deteccion de manos, estado de servicios y consulta de logs.
+
+Tecnologia utilizada: Node.js con Express.
+
+Este servicio es consumido principalmente por los clientes del sistema, ya que evita que cada cliente tenga que conocer directamente la ubicacion interna de cada microservicio. Tambien puede ser consultado por el administrador cuando se requiere revisar informacion operativa, salud de servicios o logs centralizados.
+
+[cols="1,1,3", options="header"]
+|===
+|Metodo |Ruta |Funcion
+
+|POST |/auth/login |Iniciar sesion como estudiante o tutor.
+|POST |/auth/admin/login |Iniciar sesion como administrador.
+|POST |/auth/register |Registrar un usuario y devolver un token JWT.
+|GET |/data/admins |Consultar administradores registrados.
+|POST |/data/admins |Crear un administrador.
+|GET |/data/admins/{id} |Consultar un administrador por identificador.
+|PUT |/data/admins/{id} |Actualizar informacion de un administrador.
+|DELETE |/data/admins/{id} |Eliminar un administrador.
+|GET |/data/students |Consultar estudiantes.
+|GET |/data/students/{id} |Consultar un estudiante por identificador.
+|PUT |/data/students/{id} |Actualizar informacion de un estudiante.
+|GET |/data/students/{id}/sessions |Consultar sesiones asociadas a un estudiante.
+|POST |/data/sessions |Registrar una sesion de actividad.
+|POST |/data/level-results |Registrar un resultado de nivel.
+|GET |/data/tutors/{id} |Consultar un tutor por identificador.
+|PUT |/data/tutors/{id} |Actualizar informacion de un tutor.
+|GET |/data/tutors/{id}/students |Consultar estudiantes asignados a un tutor.
+|POST |/data/tutors/assign-student |Asignar un estudiante a un tutor.
+|GET |/data/dashboard/summary |Consultar resumen estadistico del sistema.
+|POST |/hands |Enviar una imagen para deteccion de manos.
+|GET |/logs/api/logs |Consultar logs agregados.
+|GET |/logs/api/logs/service/{serviceName} |Consultar logs filtrados por servicio.
+|GET |/health |Consultar el estado del gateway.
+|GET |/health/{serviceName} |Consultar el estado de un servicio especifico.
+|===
+
+El API Gateway cuenta con documentacion interactiva Swagger/OpenAPI. Esta documentacion permite visualizar las rutas disponibles, los metodos HTTP, los parametros esperados, los esquemas de respuesta y los endpoints que requieren autorizacion.
+
+.Evidencia Swagger del API Gateway
+image::imagenes/swagger/swagger-gateway-evidencia.png[width=100%, align=center]
+
+=== Microservicio de Autenticacion
+
+El microservicio de autenticacion concentra las operaciones relacionadas con inicio de sesion, registro de usuarios y emision de tokens JWT. Su funcion principal es validar credenciales y entregar al resto del sistema una identidad autenticada con el rol correspondiente.
+
+Tecnologia utilizada: .netcore con ASP.NET Core.
+
+Este servicio es consumido por el API Gateway y por cualquier cliente que necesite iniciar sesion o registrar usuarios. Los tokens generados por este microservicio son utilizados posteriormente para controlar el acceso a las funcionalidades protegidas del sistema.
+
+[cols="1,1,3", options="header"]
+|===
+|Metodo |Ruta |Funcion
+
+|POST |/auth/login |Validar credenciales de estudiante o tutor.
+|POST |/auth/admin/login |Validar credenciales de administrador.
+|POST |/auth/register |Registrar un nuevo usuario y generar su respuesta de autenticacion.
+|GET |/health |Consultar el estado del servicio y su conexion con la base de datos.
+|===
+
+El microservicio expone documentacion Swagger para consultar sus contratos de entrada y salida. En esta interfaz se muestran las operaciones de autenticacion y los modelos usados para login y registro.
+
+.Evidencia Swagger del Microservicio de Autenticacion
+image::imagenes/swagger/swagger-auth-evidencia.png[width=100%, align=center]
+
+=== Microservicio de Datos
+
+El microservicio de datos administra la informacion relacional del dominio principal del sistema. Su funcion es exponer operaciones para administradores, estudiantes, tutores, niveles, sesiones, resultados de nivel y resumenes estadisticos.
+
+Tecnologia utilizada: .netcore con ASP.NET Core y Entity Framework Core.
+
+Este servicio es consumido por el API Gateway y consultado indirectamente por estudiantes, tutores, profesores y administradores. El estudiante interactua con informacion de su progreso y sesiones; el tutor o profesor consulta estudiantes asignados y resultados; el administrador consulta informacion general y estadisticas.
+
+[cols="1,1,3", options="header"]
+|===
+|Metodo |Ruta |Funcion
+
+|GET |/admins |Consultar administradores.
+|POST |/admins |Crear administradores.
+|GET |/admins/{id} |Consultar un administrador por identificador.
+|PUT |/admins/{id} |Actualizar un administrador.
+|DELETE |/admins/{id} |Eliminar un administrador.
+|GET |/students |Consultar estudiantes.
+|POST |/students |Crear estudiantes.
+|GET |/students/{id} |Consultar un estudiante por identificador.
+|PUT |/students/{id} |Actualizar un estudiante.
+|DELETE |/students/{id} |Eliminar un estudiante.
+|GET |/students/{id}/tutor |Consultar el tutor asociado a un estudiante.
+|GET |/students/tutor/{tutorId}/ids |Consultar identificadores de estudiantes asociados a un tutor.
+|GET |/students/{studentId}/sessions |Consultar sesiones de un estudiante.
+|GET |/students/{studentId}/sessions/ids |Consultar identificadores de sesiones de un estudiante.
+|GET |/tutors |Consultar tutores.
+|POST |/tutors |Crear tutores.
+|GET |/tutors/{id} |Consultar un tutor por identificador.
+|PUT |/tutors/{id} |Actualizar un tutor.
+|DELETE |/tutors/{id} |Eliminar un tutor.
+|GET |/tutors/{id}/students |Consultar estudiantes asignados a un tutor.
+|GET |/tutors/{tutorId}/sessions |Consultar sesiones asociadas a estudiantes de un tutor.
+|POST |/tutors/assign-student |Asignar un estudiante a un tutor.
+|GET |/levels |Consultar niveles.
+|POST |/levels |Crear niveles.
+|GET |/levels/{id} |Consultar un nivel por identificador.
+|PUT |/levels/{id} |Actualizar un nivel.
+|DELETE |/levels/{id} |Eliminar un nivel.
+|GET |/sessions |Consultar sesiones.
+|POST |/sessions |Crear sesiones.
+|GET |/sessions/{id} |Consultar una sesion por identificador.
+|PUT |/sessions/{id} |Actualizar una sesion.
+|DELETE |/sessions/{id} |Eliminar una sesion.
+|GET |/sessions/{sessionId}/level-results/ids |Consultar identificadores de resultados asociados a una sesion.
+|GET |/level-results |Consultar resultados de nivel.
+|POST |/level-results |Crear resultados de nivel.
+|GET |/level-results/{id} |Consultar un resultado de nivel.
+|PUT |/level-results/{id} |Actualizar un resultado de nivel.
+|DELETE |/level-results/{id} |Eliminar un resultado de nivel.
+|GET |/dashboard/summary |Consultar resumen estadistico.
+|GET |/health |Consultar el estado del servicio y su conexion con la base de datos.
+|===
+
+El microservicio de datos cuenta con documentacion Swagger para explorar las rutas del dominio educativo y probar las operaciones disponibles. La documentacion muestra tambien los endpoints protegidos que requieren autenticacion mediante token.
+
+.Evidencia Swagger del Microservicio de Datos
+image::imagenes/swagger/swagger-datos-evidencia.png[width=100%, align=center]
+
+=== Servicio de Deteccion de Manos
+
+El servicio HandsDetection procesa imagenes para detectar manos y calcular el conteo de dedos por mano. Su funcion dentro del sistema es atender la capacidad de reconocimiento visual usada por los clientes a traves del API Gateway.
+
+Tecnologia utilizada: Python con gRPC, MediaPipe y OpenCV.
+
+Este servicio no se consume directamente desde los clientes. El cliente envia la solicitud HTTP al Gateway mediante la ruta `/hands` y el Gateway traduce esa operacion hacia el servicio gRPC `FingerDetector.StreamFrames`. En Docker el contenedor se llama `fqe-hands-detection` y publica el puerto `50051`. Ademas, dentro del contenedor levanta un endpoint HTTP tecnico en `127.0.0.1:8080/health`, utilizado por Docker para validar su estado.
+
+[cols="1,1,3", options="header"]
+|===
+|Protocolo |Operacion |Funcion
+
+|gRPC |FingerDetector.StreamFrames |Recibir imagenes codificadas y devolver conteo de dedos por mano.
+|HTTP |GET /health |Verificar internamente que el proceso del servicio esta activo.
+|===
+
+El contrato de comunicacion se define en `fingers.proto`. La peticion usa `FrameRequest`, que contiene la imagen y el identificador de cliente; la respuesta usa `FingerResponse`, que incluye conteo de mano izquierda, mano derecha, total y bandera de manos detectadas. A diferencia de los servicios HTTP, este componente no expone Swagger porque su interfaz principal es gRPC.
+
+=== Microservicio de Logs
+
+El microservicio de logs permite consultar eventos operativos generados por los servicios del sistema. Su funcion es recuperar registros almacenados en MongoDB, aplicar filtros de busqueda y facilitar la supervision del comportamiento del backend.
+
+Tecnologia utilizada: Node.js con Express, MongoDB Driver y WebSocket.
+
+Este servicio es consultado principalmente por el administrador, ya sea directamente o a traves del API Gateway. Tambien sirve como soporte tecnico para analizar errores, rutas consultadas, acciones ejecutadas, servicios involucrados y tiempos de respuesta.
+
+[cols="1,1,3", options="header"]
+|===
+|Metodo |Ruta |Funcion
+
+|GET |/api/logs |Consultar logs generales con filtros opcionales.
+|GET |/api/logs/service/{serviceName} |Consultar logs filtrados por servicio.
+|GET |/health |Consultar el estado del servicio y su conexion con MongoDB.
+|WS |/ws/logs |Recibir eventos de logs en tiempo real.
+|===
+
+La documentacion Swagger del microservicio muestra las rutas HTTP disponibles para consulta de logs y salud del servicio. El canal WebSocket se documenta como parte de la descripcion funcional del servicio, ya que OpenAPI esta orientado principalmente a endpoints HTTP.
+
+.Evidencia Swagger del Microservicio de Logs
+image::imagenes/swagger/swagger-logs-evidencia.png[width=100%, align=center]
+
+=== Listener RabbitMQ-MongoDB
+
+El listener RabbitMQ-MongoDB se encarga de consumir eventos publicados en la cola de mensajeria del sistema y persistirlos en MongoDB. Su responsabilidad es separar la generacion de logs de su almacenamiento, permitiendo que los servicios productores no dependan directamente de la base documental.
+
+Tecnologia utilizada: Node.js con amqplib, MongoDB Driver y Express para su endpoint tecnico de monitoreo.
+
+Este servicio no es consumido por usuarios finales. Es consultado por administradores o responsables tecnicos solamente para verificar su estado operativo. En la arquitectura funciona como componente de integracion entre la mensajeria RabbitMQ y la persistencia documental de eventos.
+
+[cols="1,1,3", options="header"]
+|===
+|Metodo |Ruta |Funcion
+
+|GET |/health |Consultar el estado del listener, su conexion con RabbitMQ y su conexion con MongoDB.
+|===
+
+El listener tambien expone una documentacion Swagger sencilla enfocada en su endpoint de verificacion de salud. Esto permite comprobar que el componente cuenta con una interfaz tecnica documentada para monitoreo.
+
+.Evidencia Swagger del Listener RabbitMQ-MongoDB
+image::imagenes/swagger/swagger-rabbit-listener-evidencia.png[width=100%, align=center]

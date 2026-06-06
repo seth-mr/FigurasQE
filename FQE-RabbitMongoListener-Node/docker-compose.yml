@@ -1,0 +1,26 @@
+services:
+  listener:
+    build:
+      context: .
+    container_name: fqe-rabbitmongo-listener
+    restart: unless-stopped
+    environment:
+      RABBITMQ_HOST: host.docker.internal
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+      RABBITMQ_QUEUE: fqe.logs
+      RABBITMQ_PREFETCH: 20
+      RABBITMQ_AUTO_DECLARE: "true"
+      RABBITMQ_DURABLE_QUEUE: "true"
+      MONGO_CONNECTION_STRING: ${MONGO_CONNECTION_STRING_DOCKER:?Set MONGO_CONNECTION_STRING_DOCKER in .env}
+      MONGO_DATABASE: logsdb
+      MONGO_COLLECTION: events
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: 5190
+      RECONNECT_DELAY_MS: 5000
+      LOG_LEVEL: info
+    ports:
+      - "5190:5190"
+      - "5191:5191"

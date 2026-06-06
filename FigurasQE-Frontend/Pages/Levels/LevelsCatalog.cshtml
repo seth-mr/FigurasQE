@@ -1,0 +1,74 @@
+@page
+@model LevelsCatalogModel
+@{
+    ViewData["Title"] = "Niveles";
+    Layout = "_LayoutNoHeader";
+    var returnPage = User.IsInRole("student")
+        ? "/Student/Home"
+        : User.IsInRole("tutor")
+            ? "/Tutor/Home"
+            : "/Index";
+}
+
+<a asp-page="@returnPage" class="catalog-back-button btn btn-light shadow-sm">
+    Regresar
+</a>
+
+<div class="text-center mb-4">
+    <a asp-page="/Index" class="link-dark display-4 link-offset-2 link-underline link-underline-opacity-0">Figuras Que Enseñan</a>
+</div>
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<div class="grid-container">
+    <a asp-page="/Levels/Level1/Level1" class="cell btn btn-dark">
+        Nivel 1
+    </a>
+    <a asp-page="/Levels/Level2/Level2" class="cell btn btn-primary">
+        Nivel 2
+    </a>
+    <a asp-page="/Levels/Level3/Level3" class="cell btn btn-success">
+        Nivel 3
+    </a>
+    <a asp-page="/Levels/Level4/Level4" class="cell btn btn-info">
+        Nivel 4
+    </a>
+    <a asp-page="/Levels/Level5/Level5" class="cell btn btn-warning">
+        Nivel 5
+    </a>
+    <a asp-page="/Levels/Level6/Level6" class="cell btn btn-danger">
+        Nivel 6
+    </a>
+</div>
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .cell {
+        width: 100px;
+        height: 100px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        border-radius: 1rem;
+        font-size: 1.2rem;
+
+        transition: all 0.2s ease;
+    }
+
+    .catalog-back-button {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1100;
+        border: 1px solid rgba(21, 80, 63, .14);
+        color: #15503f;
+        font-weight: 800;
+    }
+</style>

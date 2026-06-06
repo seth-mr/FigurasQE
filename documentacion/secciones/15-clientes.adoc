@@ -1,0 +1,83 @@
+== Clientes del Sistema
+
+El sistema cuenta con diferentes clientes de usuario que consumen las funcionalidades expuestas por los microservicios. Cada cliente esta orientado a un contexto de uso distinto: acceso web para estudiantes, tutores o profesores; una aplicacion de escritorio para administracion; y una aplicacion movil para consulta y seguimiento desde dispositivos Android.
+
+La separacion entre clientes permite adaptar la experiencia de usuario al tipo de actor que interactua con el sistema, sin mezclar responsabilidades de interfaz con la logica de los microservicios.
+
+=== Cliente Web
+
+El cliente web corresponde a la interfaz accesible desde navegador. Esta orientado principalmente a usuarios como estudiantes, tutores o profesores, permitiendo iniciar sesion, registrarse y consultar informacion asociada al perfil autenticado.
+
+Tecnologia utilizada: .netcore con ASP.NET Core Razor Pages.
+
+Este cliente consume principalmente el API Gateway, enviando solicitudes de autenticacion y consultas de datos mediante HTTP. Despues del inicio de sesion, conserva el token JWT dentro de la sesion del usuario y lo utiliza para consultar informacion protegida.
+
+[cols="1,3", options="header"]
+|===
+|Aspecto |Descripcion
+
+|Usuarios principales |Estudiantes, tutores y profesores.
+|Funciones principales |Inicio de sesion, registro de usuario, consulta de perfil, consulta de informacion de estudiante y consulta de informacion de tutor.
+|Servicios consumidos |API Gateway para autenticacion y acceso a datos.
+|Manejo de sesion |Uso de autenticacion por cookies en el cliente y almacenamiento del token JWT como claim de sesion.
+|===
+
+La eleccion de Razor Pages se justifica porque permite construir una interfaz web tradicional, organizada por paginas, con integracion directa entre vistas, modelos y logica de servidor. Para este proyecto resulta conveniente porque las pantallas de estudiante, tutor y autenticacion pueden manejarse de forma clara sin requerir una aplicacion web de una sola pagina.
+
+.Evidencia de interfaz del Cliente Web
+image::imagenes/clientes/cliente-web.png[width=100%, align=center]
+
+=== Cliente WPF Administrativo
+
+El cliente WPF corresponde a una aplicacion de escritorio dirigida al administrador del sistema. Su objetivo es proporcionar una interfaz enfocada en supervision, consulta de estadisticas, monitoreo de servicios, revision de logs y gestion del perfil administrativo.
+
+Tecnologia utilizada: .netcore con WPF.
+
+Este cliente consume el API Gateway y el modulo de logs expuesto por el backend. Utiliza el token de administrador para consultar informacion protegida, visualizar datos estadisticos y recibir eventos operativos del sistema.
+
+[cols="1,3", options="header"]
+|===
+|Aspecto |Descripcion
+
+|Usuario principal |Administrador.
+|Funciones principales |Inicio de sesion administrativo, consulta de dashboard, consulta y actualizacion de perfil, consulta de logs, monitoreo de servicios y visualizacion de estadisticas.
+|Servicios consumidos |API Gateway y rutas de logs centralizadas.
+|Manejo de sesion |Estado de sesion administrativo en memoria, incluyendo token JWT y perfil del administrador.
+|===
+
+La eleccion de WPF se justifica porque el rol administrativo requiere una interfaz mas cercana a una herramienta de escritorio: paneles, tablas, filtros, monitoreo y vistas de control. WPF permite construir una aplicacion de escritorio para Windows con ventanas, vistas XAML y separacion entre controladores, servicios y modelos.
+
+.Evidencia de interfaz del Cliente WPF Administrativo
+image::imagenes/clientes/cliente-wpf-evidencia.png[width=100%, align=center]
+
+=== Cliente Android
+
+El cliente Android corresponde a la aplicacion movil del sistema. Esta orientado a permitir acceso desde dispositivos Android, especialmente para tutores, profesores o usuarios que necesiten consultar informacion de estudiantes de forma portable.
+
+Tecnologia utilizada: Kotlin con Android, Jetpack Compose, Retrofit, OkHttp y coroutines.
+
+Este cliente consume el API Gateway mediante Retrofit. Implementa autenticacion, almacenamiento de sesion, navegacion entre pantallas, consulta de tutor, consulta de estudiantes asignados, detalle de estudiante, sesiones y actualizacion de perfil.
+
+[cols="1,3", options="header"]
+|===
+|Aspecto |Descripcion
+
+|Usuarios principales |Tutores, profesores y estudiantes en escenarios moviles.
+|Funciones principales |Inicio de sesion, registro, navegacion por rol, consulta de perfil, consulta de estudiantes asignados, consulta de detalle de estudiante, consulta de sesiones y asignacion de estudiante a tutor.
+|Servicios consumidos |API Gateway para autenticacion y acceso a datos.
+|Manejo de sesion |Almacenamiento local del token JWT y lectura de claims para identificar al usuario autenticado.
+|===
+
+La eleccion de Kotlin con Jetpack Compose se justifica porque permite desarrollar una interfaz nativa para Android con componentes modernos, declarativos y adaptados a dispositivos moviles. Retrofit y OkHttp facilitan el consumo de APIs HTTP documentadas por el backend, mientras que coroutines permiten manejar operaciones asincronas sin bloquear la interfaz.
+
+La captura de evidencia del cliente Android queda pendiente de integrarse desde un emulador o dispositivo fisico, ya que la interfaz movil requiere ejecucion en un entorno Android para obtener una captura real de la aplicacion.
+
+=== Justificacion General de los Clientes
+
+La existencia de varios clientes responde a que el sistema atiende necesidades distintas segun el actor:
+
+* El cliente web facilita el acceso desde cualquier navegador y resulta adecuado para estudiantes, tutores o profesores que trabajan desde equipos de escritorio o portatiles.
+* El cliente WPF concentra las funciones administrativas en una aplicacion de escritorio, adecuada para monitoreo, revision de informacion y operacion interna.
+* El cliente Android permite consultar informacion desde dispositivos moviles, lo cual favorece el seguimiento por parte de tutores o profesores fuera de un entorno fijo.
+
+En conjunto, los clientes consumen los servicios del backend sin duplicar la logica principal del sistema. La autenticacion, las reglas de acceso, la persistencia de datos y la consulta de logs permanecen en los microservicios, mientras que cada cliente se enfoca en presentar la informacion de forma adecuada para su usuario final.

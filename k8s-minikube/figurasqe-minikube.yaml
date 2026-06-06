@@ -1,0 +1,475 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+        - name: postgres-db
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: "1234"
+            - name: POSTGRES_DB
+              value: figurasqe
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db
+spec:
+  selector:
+    app: postgres-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-logs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-logs
+  template:
+    metadata:
+      labels:
+        app: mongo-logs
+    spec:
+      containers:
+        - name: mongo-logs
+          image: mongo:8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: seth
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: Khazix77uv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-logs
+spec:
+  selector:
+    app: mongo-logs
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+    - name: management
+      port: 15672
+      targetPort: 15672
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: figurasqe-authenticationservice-auth-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5041
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: http://+:5041
+            - name: ConnectionStrings__DefaultConnection
+              value: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+            - name: Jwt__Issuer
+              value: figurasqe-auth
+            - name: Jwt__Audience
+              value: figurasqe-client
+            - name: Jwt__Secret
+              value: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+            - name: Jwt__ExpirationMinutes
+              value: "10080"
+            - name: Service__Port
+              value: "5041"
+            - name: Service__Endpoints__Frontend
+              value: http://frontend:8080
+            - name: Service__Endpoints__MicroservicioFiguras
+              value: http://microservicio-figuras:5124
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth-service
+  ports:
+    - port: 5041
+      targetPort: 5041
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservicio-figuras
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: microservicio-figuras
+  template:
+    metadata:
+      labels:
+        app: microservicio-figuras
+    spec:
+      containers:
+        - name: microservicio-figuras
+          image: figuerasqueense-anbd-microservicio-figuras:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5124
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: http://+:5124
+            - name: ConnectionStrings__PostgresConnection
+              value: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+            - name: Jwt__Issuer
+              value: figurasqe-auth
+            - name: Jwt__Audience
+              value: figurasqe-client
+            - name: Jwt__Key
+              value: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+            - name: Service__Port
+              value: "5124"
+            - name: Service__Endpoints__AuthService
+              value: http://auth-service:5041
+            - name: Service__Endpoints__LogsService
+              value: http://logs-service:5186
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservicio-figuras
+spec:
+  selector:
+    app: microservicio-figuras
+  ports:
+    - port: 5124
+      targetPort: 5124
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: logs-service
+  template:
+    metadata:
+      labels:
+        app: logs-service
+    spec:
+      containers:
+        - name: logs-service
+          image: fqelogsservice-logs-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5186
+          env:
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "5186"
+            - name: NODE_ENV
+              value: production
+            - name: MONGO_URI
+              value: mongodb://seth:Khazix77uv@mongo-logs:27017/logsdb?authSource=admin
+            - name: MONGO_DATABASE
+              value: logsdb
+            - name: MONGO_COLLECTION
+              value: events
+            - name: DEFAULT_LIMIT
+              value: "200"
+            - name: MAX_LIMIT
+              value: "1000"
+            - name: POLL_INTERVAL_MS
+              value: "1000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logs-service
+spec:
+  selector:
+    app: logs-service
+  ports:
+    - port: 5186
+      targetPort: 5186
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmongo-listener
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rabbitmongo-listener
+  template:
+    metadata:
+      labels:
+        app: rabbitmongo-listener
+    spec:
+      containers:
+        - name: rabbitmongo-listener
+          image: fqe-rabbitmongolistener-node-listener:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5190
+            - containerPort: 5191
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest
+            - name: RABBITMQ_VHOST
+              value: /
+            - name: RABBITMQ_QUEUE
+              value: fqe.logs
+            - name: RABBITMQ_PREFETCH
+              value: "20"
+            - name: RABBITMQ_AUTO_DECLARE
+              value: "true"
+            - name: RABBITMQ_DURABLE_QUEUE
+              value: "true"
+            - name: MONGO_CONNECTION_STRING
+              value: mongodb://seth:Khazix77uv@mongo-logs:27017/logsdb?authSource=admin
+            - name: MONGO_DATABASE
+              value: logsdb
+            - name: MONGO_COLLECTION
+              value: events
+            - name: HEALTH_HOST
+              value: 0.0.0.0
+            - name: HEALTH_PORT
+              value: "5190"
+            - name: RECONNECT_DELAY_MS
+              value: "5000"
+            - name: LOG_LEVEL
+              value: info
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmongo-listener
+spec:
+  selector:
+    app: rabbitmongo-listener
+  ports:
+    - name: health
+      port: 5190
+      targetPort: 5190
+    - name: metrics
+      port: 5191
+      targetPort: 5191
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hands-detection
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hands-detection
+  template:
+    metadata:
+      labels:
+        app: hands-detection
+    spec:
+      containers:
+        - name: hands-detection
+          image: handsdetection-hands-detection:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hands-detection
+spec:
+  selector:
+    app: hands-detection
+  ports:
+    - port: 50051
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: figurasqe-gateway-gateway:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: AUTH_SERVICE
+              value: http://auth-service:5041
+            - name: DATA_SERVICE
+              value: http://microservicio-figuras:5124
+            - name: LOGS_SERVICE
+              value: http://logs-service:5186
+            - name: FRONTEND_SERVICE
+              value: http://frontend:8080
+            - name: RABBIT_LISTENER_SERVICE
+              value: http://rabbitmongo-listener:5190
+            - name: RABBITMQ_URL
+              value: amqp://guest:guest@rabbitmq:5672
+            - name: RABBITMQ_QUEUE
+              value: fqe.logs
+            - name: IMPORTANT_LOG_ENABLED
+              value: "true"
+            - name: IMPORTANT_LOG_METHODS
+              value: POST,PUT,PATCH,DELETE
+            - name: IMPORTANT_LOG_STATUS_MIN
+              value: "400"
+            - name: IMPORTANT_LOG_EXCLUDE_PREFIXES
+              value: /health,/logs
+            - name: FINGER_GRPC_TARGET
+              value: hands-detection:50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  type: NodePort
+  selector:
+    app: api-gateway
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: figurasqe-frontend:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: ApiGateway__InternalBaseUrl
+              value: http://api-gateway:3000
+            - name: ApiGateway__PublicBaseUrl
+              value: http://localhost:3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30081

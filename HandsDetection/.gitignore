@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+hand_landmarker.task
+fingers_pb2.py
+fingers_pb2_grpc.py

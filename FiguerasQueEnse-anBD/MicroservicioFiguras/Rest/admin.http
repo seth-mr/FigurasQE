@@ -1,0 +1,95 @@
+@authHost = http://localhost:5041
+
+@host = http://localhost:5124
+@gatewayHost = http://localhost:3000
+
+### ==================================================
+### ADMINS
+### 1) Si no existe ningun admin, puedes crear el primero sin token.
+### 2) Despues, todo el CRUD requiere JWT con role=admin.
+### 3) Haz login en auth y pega el token aqui.
+### ==================================================
+
+@adminToken = <PEGAR_TOKEN_ADMIN>
+@adminId = 1
+
+### Bootstrap del primer admin (solo funciona si no existe ninguno)
+POST {{host}}/admins
+Content-Type: application/json
+
+{
+  "name": "Admin Principal",
+  "email": "admin.principal@mail.com",
+  "phone": "+525512345678",
+  "username": "admin.principal",
+  "password": "AdminPass123!"
+}
+
+###
+
+### Login admin
+POST {{authHost}}/auth/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin.principal@mail.com",
+  "password": "AdminPass123!"
+}
+
+###
+
+### Listar admins
+GET {{host}}/admins
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+### Obtener admin por id
+GET {{host}}/admins/{{adminId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+### Crear admin adicional
+POST {{host}}/admins
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Admin Secundario",
+  "email": "admin.secundario@mail.com",
+  "phone": "+525576543210",
+  "username": "admin.secundario",
+  "password": "AdminPass456!"
+}
+
+###
+
+### Actualizar admin
+PUT {{host}}/admins/{{adminId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Admin Principal Actualizado",
+  "email": "admin.principal@mail.com",
+  "phone": "+525500000000",
+  "username": "admin.principal",
+  "password": "AdminPass123!"
+}
+
+###
+
+### Eliminar admin
+DELETE {{host}}/admins/{{adminId}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+### Resumen estadistico del panel via gateway (admin-only)
+GET {{gatewayHost}}/data/dashboard/summary
+Authorization: Bearer {{adminToken}}
+Accept: application/json
