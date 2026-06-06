@@ -1,0 +1,10 @@
+# Keep dependency/runtime files in the repo, but exclude them from GitHub
+# language statistics.
+.venv/** linguist-vendored
+**/node_modules/** linguist-vendored
+
+# Generated/runtime artifacts that should not affect language stats.
+**/__pycache__/** linguist-generated
+docker-data/** linguist-generated
+jmeter-results/** linguist-generated
+newman/reports/** linguist-generated
