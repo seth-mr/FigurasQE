@@ -1,3 +1,0 @@
-E0527 13:42:07.251543   13796 portforward.go:404] "Unhandled Error" err="error copying from local connection to remote stream: writeto tcp4 127.0.0.1:8081->127.0.0.1:52295: read tcp4 127.0.0.1:8081->127.0.0.1:52295: wsarecv: An existing connection was forcibly closed by the remote host."
-E0527 13:42:23.182101   13796 portforward.go:404] "Unhandled Error" err="error copying from local connection to remote stream: writeto tcp4 127.0.0.1:8081->127.0.0.1:52297: read tcp4 127.0.0.1:8081->127.0.0.1:52297: wsarecv: An existing connection was forcibly closed by the remote host."
-error: lost connection to pod
