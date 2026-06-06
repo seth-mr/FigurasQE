@@ -1,0 +1,228 @@
+services:
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: figurasqe
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d figurasqe"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-logs:
+    image: mongo:8
+    container_name: mongo-logs
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-seth}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-1234}
+      MONGO_INITDB_DATABASE: logsdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build:
+      context: ./FigurasQE-AuthenticationService
+      dockerfile: Dockerfile
+    container_name: fqe-auth-service
+    restart: unless-stopped
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    ports:
+      - "5041:5041"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5041
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+      Jwt__Issuer: figurasqe-auth
+      Jwt__Audience: figurasqe-client
+      Jwt__Secret: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+      Jwt__ExpirationMinutes: 10080
+      Service__Port: 5041
+      Service__Endpoints__Frontend: http://frontend:8080
+      Service__Endpoints__MicroservicioFiguras: http://microservicio-figuras:5124
+
+  microservicio-figuras:
+    build:
+      context: ./FiguerasQueEnse-anBD
+      dockerfile: Dockerfile
+    container_name: fqe-microservicio-figuras
+    restart: unless-stopped
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    ports:
+      - "5124:5124"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5124
+      ConnectionStrings__PostgresConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+      Jwt__Issuer: figurasqe-auth
+      Jwt__Audience: figurasqe-client
+      Jwt__Key: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+      Service__Port: 5124
+      Service__Endpoints__AuthService: http://auth-service:5041
+      Service__Endpoints__LogsService: http://logs-service:5186
+
+  logs-service:
+    build:
+      context: ./FQE.LogsService
+      dockerfile: Dockerfile
+    container_name: fqe-logs-service
+    restart: unless-stopped
+    depends_on:
+      mongo-logs:
+        condition: service_healthy
+    ports:
+      - "5186:5186"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5186
+      NODE_ENV: production
+      MONGO_URI: mongodb://seth:1234@mongo-logs:27017/logsdb?authSource=admin
+      MONGO_DATABASE: logsdb
+      MONGO_COLLECTION: events
+      DEFAULT_LIMIT: 200
+      MAX_LIMIT: 1000
+      POLL_INTERVAL_MS: 1000
+
+  rabbitmongo-listener:
+    build:
+      context: ./FQE-RabbitMongoListener-Node
+      dockerfile: Dockerfile
+    container_name: fqe-rabbitmongo-listener
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo-logs:
+        condition: service_healthy
+    ports:
+      - "5190:5190"
+      - "5191:5191"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+      RABBITMQ_QUEUE: fqe.logs
+      RABBITMQ_PREFETCH: 20
+      RABBITMQ_AUTO_DECLARE: "true"
+      RABBITMQ_DURABLE_QUEUE: "true"
+      MONGO_CONNECTION_STRING: mongodb://seth:1234@mongo-logs:27017/logsdb?authSource=admin
+      MONGO_DATABASE: logsdb
+      MONGO_COLLECTION: events
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: 5190
+      RECONNECT_DELAY_MS: 5000
+      LOG_LEVEL: info
+
+  hands-detection:
+    build:
+      context: ./HandsDetection
+      dockerfile: Dockerfile
+    container_name: fqe-hands-detection
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+      - "8082:8080"
+
+  gateway:
+    build:
+      context: ./FigurasQE-Gateway
+      dockerfile: Dockerfile
+    container_name: fqe-gateway
+    restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_started
+      microservicio-figuras:
+        condition: service_started
+      logs-service:
+        condition: service_started
+      rabbitmongo-listener:
+        condition: service_started
+      hands-detection:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AUTH_SERVICE: http://auth-service:5041
+      DATA_SERVICE: http://microservicio-figuras:5124
+      LOGS_SERVICE: http://logs-service:5186
+      FRONTEND_SERVICE: http://frontend:8080
+      RABBIT_LISTENER_SERVICE: http://rabbitmongo-listener:5190
+      HANDS_DETECTION_SERVICE: http://hands-detection:8080
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_QUEUE: fqe.logs
+      IMPORTANT_LOG_ENABLED: "true"
+      IMPORTANT_LOG_METHODS: POST,PUT,PATCH,DELETE
+      IMPORTANT_LOG_STATUS_MIN: 400
+      IMPORTANT_LOG_EXCLUDE_PREFIXES: /health,/logs
+      FINGER_GRPC_TARGET: hands-detection:50051
+
+  frontend:
+    build:
+      context: ./FigurasQE-Frontend
+      dockerfile: Dockerfile
+    container_name: figurasqe-frontend
+    restart: unless-stopped
+    depends_on:
+      gateway:
+        condition: service_started
+    ports:
+      - "5028:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Service__Port: 8080
+      Service__Endpoints__AuthService: http://auth-service:5041
+      Service__Endpoints__MicroservicioFiguras: http://microservicio-figuras:5124
+      ApiGateway__InternalBaseUrl: http://gateway:3000
+      ApiGateway__PublicBaseUrl: http://localhost:3000
+
+volumes:
+  postgres_data:
+  mongo_data:
+  rabbitmq_data:
