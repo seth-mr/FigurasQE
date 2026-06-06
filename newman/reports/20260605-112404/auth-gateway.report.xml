@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FQE Auth via Gateway" tests="13" time="1.724">
+  <testsuite name="Login - body vacio" id="d85aa64a-70f2-48fa-9f42-9571c32a044e" timestamp="2026-06-05T17:24:09.632Z" tests="3" failures="0" errors="0" time="0.146">
+    <testcase name="Regresa 400" time="0.146" classname="LoginBodyVacio"/>
+    <testcase name="Regresa envelope de error del gateway" time="0.146" classname="LoginBodyVacio"/>
+    <testcase name="Valida email y password requeridos" time="0.146" classname="LoginBodyVacio"/>
+  </testsuite>
+  <testsuite name="Login - email y password null" id="2a060e0e-e1be-41d6-bfbd-f534f4333705" timestamp="2026-06-05T17:24:09.632Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="Regresa 400 para nulos" time="0.012" classname="LoginEmailYPasswordNull"/>
+  </testsuite>
+  <testsuite name="Login - password incorrecto" id="f8871358-a789-4c3e-b1ea-1c430c753f64" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.149">
+    <testcase name="Regresa 401" time="0.149" classname="LoginPasswordIncorrecto"/>
+    <testcase name="Mensaje esperado" time="0.149" classname="LoginPasswordIncorrecto"/>
+  </testsuite>
+  <testsuite name="Login - estudiante existente" id="a826341d-bc12-44bb-b29c-8efcdd63e049" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.145">
+    <testcase name="Regresa 200" time="0.145" classname="LoginEstudianteExistente"/>
+    <testcase name="Entrega token y role student" time="0.145" classname="LoginEstudianteExistente"/>
+  </testsuite>
+  <testsuite name="Login - tutor existente" id="af32ba15-81bc-4935-902a-644efc573dca" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.164">
+    <testcase name="Regresa 200" time="0.164" classname="LoginTutorExistente"/>
+    <testcase name="Entrega token y role tutor" time="0.164" classname="LoginTutorExistente"/>
+  </testsuite>
+  <testsuite name="Admin Login - body vacio" id="8d034934-e31a-488c-b73e-6ce3c371418f" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.016">
+    <testcase name="Regresa 400" time="0.016" classname="AdminLoginBodyVacio"/>
+    <testcase name="Valida Email y Password" time="0.016" classname="AdminLoginBodyVacio"/>
+  </testsuite>
+  <testsuite name="Admin Login - exito" id="a3b376eb-f035-4106-b8cc-75cb9ad3aba8" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.196">
+    <testcase name="Regresa 200" time="0.196" classname="AdminLoginExito"/>
+    <testcase name="Entrega token de admin y objeto admin" time="0.196" classname="AdminLoginExito"/>
+  </testsuite>
+  <testsuite name="Register - body vacio" id="230705ba-7a6e-403f-be64-9c8a310d9242" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.027">
+    <testcase name="Regresa 400" time="0.027" classname="RegisterBodyVacio"/>
+    <testcase name="Valida campos requeridos principales" time="0.027" classname="RegisterBodyVacio"/>
+  </testsuite>
+  <testsuite name="Register - valores null" id="83d9a8fd-4393-427c-920e-975ee9bf7f4d" timestamp="2026-06-05T17:24:09.632Z" tests="1" failures="0" errors="0" time="0.042">
+    <testcase name="Regresa 400 para nulls" time="0.042" classname="RegisterValoresNull"/>
+  </testsuite>
+  <testsuite name="Register - estudiante nuevo" id="219f3a8e-a136-4b1a-ad67-2d7bb7b37679" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.350">
+    <testcase name="Registra estudiante con 200" time="0.350" classname="RegisterEstudianteNuevo"/>
+    <testcase name="Entrega token y role student" time="0.350" classname="RegisterEstudianteNuevo"/>
+  </testsuite>
+  <testsuite name="Login - estudiante recien registrado" id="4dce2044-427a-4623-992e-d30d0b97168c" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.154">
+    <testcase name="Login del nuevo estudiante funciona" time="0.154" classname="LoginEstudianteRecienRegistrado"/>
+    <testcase name="Role sigue siendo student" time="0.154" classname="LoginEstudianteRecienRegistrado"/>
+  </testsuite>
+  <testsuite name="Register - tutor nuevo" id="ac278e2b-5c07-4490-8e6b-457c2fc348da" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.160">
+    <testcase name="Registra tutor con 200" time="0.160" classname="RegisterTutorNuevo"/>
+    <testcase name="Entrega token y role tutor" time="0.160" classname="RegisterTutorNuevo"/>
+  </testsuite>
+  <testsuite name="Login - tutor recien registrado" id="914133a2-5660-4981-9191-d0f7ecf29693" timestamp="2026-06-05T17:24:09.632Z" tests="2" failures="0" errors="0" time="0.163">
+    <testcase name="Login del nuevo tutor funciona" time="0.163" classname="LoginTutorRecienRegistrado"/>
+    <testcase name="Role sigue siendo tutor" time="0.163" classname="LoginTutorRecienRegistrado"/>
+  </testsuite>
+</testsuites>

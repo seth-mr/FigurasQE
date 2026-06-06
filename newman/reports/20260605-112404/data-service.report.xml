@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FQE Data Service" tests="69" time="3.201">
+  <testsuite name="Health" id="30935b2f-524d-417c-babf-af0e387afbe1" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.029">
+    <testcase name="Health regresa 200" time="0.029" classname="Health"/>
+    <testcase name="Servicio y base en ok" time="0.029" classname="Health"/>
+  </testsuite>
+  <testsuite name="Levels sin token" id="7b3d5d72-a273-4e82-9077-d2df8257874a" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="Sin token regresa 401" time="0.006" classname="LevelsSinToken"/>
+  </testsuite>
+  <testsuite name="Login admin" id="490c7780-e695-46de-ac78-31a74cac6388" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.125">
+    <testcase name="Login admin regresa 200" time="0.125" classname="LoginAdmin"/>
+    <testcase name="Entrega token admin" time="0.125" classname="LoginAdmin"/>
+  </testsuite>
+  <testsuite name="Login tutor existente" id="a26c05a3-7b3d-4985-83b5-d6b3a482d9c8" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.142">
+    <testcase name="Login tutor regresa 200" time="0.142" classname="LoginTutorExistente"/>
+    <testcase name="Entrega token tutor" time="0.142" classname="LoginTutorExistente"/>
+  </testsuite>
+  <testsuite name="Login estudiante existente" id="c7bb1cb2-5ee5-4244-b454-b271a6a49495" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.130">
+    <testcase name="Login student regresa 200" time="0.130" classname="LoginEstudianteExistente"/>
+    <testcase name="Entrega token student" time="0.130" classname="LoginEstudianteExistente"/>
+  </testsuite>
+  <testsuite name="Login otro estudiante" id="5fb7b724-adc9-493f-b10b-87f839283a2f" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.133">
+    <testcase name="Login del otro estudiante regresa 200" time="0.133" classname="LoginOtroEstudiante"/>
+  </testsuite>
+  <testsuite name="Dashboard summary" id="d53b8be8-41fe-4c3b-8405-a3fe0e26751f" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="Dashboard regresa 200" time="0.042" classname="DashboardSummary"/>
+    <testcase name="Resumen trae secciones principales" time="0.042" classname="DashboardSummary"/>
+  </testsuite>
+  <testsuite name="Admins - listar" id="cc47cb54-13e0-4c9b-a06e-7a758ef7fe95" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.039">
+    <testcase name="Admins regresa 200" time="0.039" classname="AdminsListar"/>
+    <testcase name="Entrega arreglo" time="0.039" classname="AdminsListar"/>
+  </testsuite>
+  <testsuite name="Admins - por id" id="3ad33b0f-fa1b-4496-8504-da02f1eaa6f5" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Admin por id regresa 200" time="0.009" classname="AdminsPorId"/>
+    <testcase name="Admin principal es el esperado" time="0.009" classname="AdminsPorId"/>
+  </testsuite>
+  <testsuite name="Admins - crear body vacio" id="a0bef404-7b62-4ef8-865b-f418c6b15f3f" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.030">
+    <testcase name="Admin vacio regresa 400" time="0.030" classname="AdminsCrearBodyVacio"/>
+    <testcase name="Trae lista de errores" time="0.030" classname="AdminsCrearBodyVacio"/>
+  </testsuite>
+  <testsuite name="Admins - crear temporal" id="d22d6241-c212-4c94-b5e8-3e5776e2494c" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.366">
+    <testcase name="Crear admin regresa 201" time="0.366" classname="AdminsCrearTemporal"/>
+    <testcase name="Admin temporal creado" time="0.366" classname="AdminsCrearTemporal"/>
+  </testsuite>
+  <testsuite name="Admins - actualizar temporal" id="4f21947d-1730-4421-bb58-d8691b84d1ea" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.291">
+    <testcase name="Actualizar admin regresa 200" time="0.291" classname="AdminsActualizarTemporal"/>
+    <testcase name="Admin actualizado" time="0.291" classname="AdminsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Admins - eliminar temporal" id="5733a4f2-9e11-4245-aede-cb8753bb1ad2" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.031">
+    <testcase name="Eliminar admin regresa 200" time="0.031" classname="AdminsEliminarTemporal"/>
+  </testsuite>
+  <testsuite name="Tutors - perfil autenticado" id="6b10cdf5-af47-4c81-acdd-753d889e62a0" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.020">
+    <testcase name="Tutors self regresa 200" time="0.020" classname="TutorsPerfilAutenticado"/>
+    <testcase name="Entrega arreglo con un solo tutor" time="0.020" classname="TutorsPerfilAutenticado"/>
+  </testsuite>
+  <testsuite name="Tutors - por id propio" id="4982e0ce-7d8a-41c9-9230-ae00166775bc" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="Tutor propio regresa 200" time="0.012" classname="TutorsPorIdPropio"/>
+    <testcase name="Tutor esperado" time="0.012" classname="TutorsPorIdPropio"/>
+  </testsuite>
+  <testsuite name="Tutors - otro tutor prohibido" id="45c75c9f-9d15-427c-b2b0-34965a5de4ca" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="Otro tutor regresa 403" time="0.009" classname="TutorsOtroTutorProhibido"/>
+  </testsuite>
+  <testsuite name="Tutors - estudiantes propios" id="c7d0d45b-c527-4510-a6ae-ff9b29a3a663" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.013">
+    <testcase name="Estudiantes del tutor regresa 200" time="0.013" classname="TutorsEstudiantesPropios"/>
+    <testcase name="Entrega estudiantes asignados" time="0.013" classname="TutorsEstudiantesPropios"/>
+  </testsuite>
+  <testsuite name="Tutors - estudiantes de otro tutor prohibido" id="8211e356-083d-49ba-9b92-9740c34fa255" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Estudiantes de otro tutor regresa 403" time="0.005" classname="TutorsEstudiantesDeOtroTutorProhibido"/>
+  </testsuite>
+  <testsuite name="Tutors - crear con nulls" id="245efbff-ca01-45eb-9d58-238b481bd0c5" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="Tutor con nulls regresa 400" time="0.012" classname="TutorsCrearConNulls"/>
+  </testsuite>
+  <testsuite name="Tutors - crear temporal directo" id="ab5dc666-66cc-4086-9894-cb89c4cf39f9" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.056">
+    <testcase name="Crear tutor regresa 201" time="0.056" classname="TutorsCrearTemporalDirecto"/>
+    <testcase name="Tutor temporal creado" time="0.056" classname="TutorsCrearTemporalDirecto"/>
+  </testsuite>
+  <testsuite name="Tutors - login temporal" id="6cea939a-844d-4f5f-8d33-83d70b2840a7" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.246">
+    <testcase name="Login del tutor temporal regresa 200" time="0.246" classname="TutorsLoginTemporal"/>
+    <testcase name="Tutor temporal entra por auth" time="0.246" classname="TutorsLoginTemporal"/>
+  </testsuite>
+  <testsuite name="Tutors - actualizar temporal" id="55ebee6a-3027-4c62-ac37-dfe8af0f4b17" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.039">
+    <testcase name="Actualizar tutor regresa 200" time="0.039" classname="TutorsActualizarTemporal"/>
+    <testcase name="Tutor temporal actualizado" time="0.039" classname="TutorsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Tutors - eliminar temporal" id="b5d968e9-c3bd-42d3-858e-172e510bd7e2" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.021">
+    <testcase name="Eliminar tutor regresa 200" time="0.021" classname="TutorsEliminarTemporal"/>
+  </testsuite>
+  <testsuite name="Students - listar como tutor" id="8f270b95-269d-4265-ab60-e4ac6a922924" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.013">
+    <testcase name="Students tutor regresa 200" time="0.013" classname="StudentsListarComoTutor"/>
+    <testcase name="Tutor ve solo su grupo" time="0.013" classname="StudentsListarComoTutor"/>
+  </testsuite>
+  <testsuite name="Students - listar como student" id="48284c81-120d-4040-9ca2-d9e8d536ce8e" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="Students student regresa 200" time="0.010" classname="StudentsListarComoStudent"/>
+    <testcase name="Student solo se ve a si mismo" time="0.010" classname="StudentsListarComoStudent"/>
+  </testsuite>
+  <testsuite name="Students - obtener propio como tutor" id="0c557338-7b56-4202-a21b-567a10fdb42b" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.022">
+    <testcase name="Student propio por tutor regresa 200" time="0.022" classname="StudentsObtenerPropioComoTutor"/>
+    <testcase name="Es el estudiante esperado" time="0.022" classname="StudentsObtenerPropioComoTutor"/>
+  </testsuite>
+  <testsuite name="Students - otro estudiante prohibido para tutor" id="18e668f1-08ef-4657-99fd-0c9f4893f0aa" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.011">
+    <testcase name="Otro estudiante para tutor regresa 403" time="0.011" classname="StudentsOtroEstudianteProhibidoParaTutor"/>
+  </testsuite>
+  <testsuite name="Students - propio como student" id="936280c4-9d3b-45b9-a3ad-6dcf3c82f458" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Student propio regresa 200" time="0.011" classname="StudentsPropioComoStudent"/>
+    <testcase name="Es su propio perfil" time="0.011" classname="StudentsPropioComoStudent"/>
+  </testsuite>
+  <testsuite name="Students - otro estudiante prohibido para student" id="ea3da1da-5d40-4d01-8a3a-89fcc033a93d" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Otro estudiante para student regresa 403" time="0.003" classname="StudentsOtroEstudianteProhibidoParaStudent"/>
+  </testsuite>
+  <testsuite name="Students - tutor del estudiante" id="3388bf8b-ef78-4534-9459-9df63c702cba" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.032">
+    <testcase name="Tutor del estudiante regresa 200" time="0.032" classname="StudentsTutorDelEstudiante"/>
+    <testcase name="Tutor del estudiante es 47" time="0.032" classname="StudentsTutorDelEstudiante"/>
+  </testsuite>
+  <testsuite name="Students - ids del tutor propio" id="4a57d767-9b35-4b7a-bc14-c017f8b61448" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.058">
+    <testcase name="Ids del tutor regresa 200" time="0.058" classname="StudentsIdsDelTutorPropio"/>
+    <testcase name="Entrega ids" time="0.058" classname="StudentsIdsDelTutorPropio"/>
+  </testsuite>
+  <testsuite name="Students - ids de otro tutor prohibido" id="a8a9d0cc-cdf8-4100-bc71-fc16034abfa1" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Ids de otro tutor regresa 403" time="0.005" classname="StudentsIdsDeOtroTutorProhibido"/>
+  </testsuite>
+  <testsuite name="Students - ids de sesiones propias" id="32ffa764-e6ac-4a62-8432-949d238b3fb3" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.014">
+    <testcase name="Ids de sesiones regresa 200" time="0.014" classname="StudentsIdsDeSesionesPropias"/>
+    <testcase name="Entrega ids de sesiones propias" time="0.014" classname="StudentsIdsDeSesionesPropias"/>
+  </testsuite>
+  <testsuite name="Students - ids de sesiones ajenas prohibido" id="58fef112-d659-49a3-b1ee-956a2a1845e2" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Ids de sesiones ajenas regresa 403" time="0.003" classname="StudentsIdsDeSesionesAjenasProhibido"/>
+  </testsuite>
+  <testsuite name="Students - crear con nulls" id="7c89d4aa-0d58-4d7c-bde7-137f6be54fd9" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.011">
+    <testcase name="Student con nulls regresa 400" time="0.011" classname="StudentsCrearConNulls"/>
+  </testsuite>
+  <testsuite name="Students - crear temporal directo" id="bb448951-f139-4f55-9135-ac166bffb239" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.091">
+    <testcase name="Crear student regresa 201" time="0.091" classname="StudentsCrearTemporalDirecto"/>
+    <testcase name="Student temporal creado sin tutor" time="0.091" classname="StudentsCrearTemporalDirecto"/>
+  </testsuite>
+  <testsuite name="Assign student - body vacio" id="55dac965-8212-476a-8e7c-06726f57d015" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Assign vacio regresa 400" time="0.007" classname="AssignStudentBodyVacio"/>
+  </testsuite>
+  <testsuite name="Assign student - exito" id="7be98c37-48f1-493d-9fb8-d4910dd22b1f" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.034">
+    <testcase name="Assign student regresa 200" time="0.034" classname="AssignStudentExito"/>
+  </testsuite>
+  <testsuite name="Students - obtener temporal ya asignado" id="196cd8eb-6d01-4fdc-830a-76a7ece991ca" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.029">
+    <testcase name="Student temporal asignado regresa 200" time="0.029" classname="StudentsObtenerTemporalYaAsignado"/>
+    <testcase name="Quedo asignado al tutor 47" time="0.029" classname="StudentsObtenerTemporalYaAsignado"/>
+  </testsuite>
+  <testsuite name="Students - actualizar temporal" id="9644c2d3-7e0e-45a6-a05c-0c24e331e34a" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.045">
+    <testcase name="Actualizar student temporal regresa 200" time="0.045" classname="StudentsActualizarTemporal"/>
+    <testcase name="Student temporal actualizado" time="0.045" classname="StudentsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Sessions - listar como tutor" id="c3709cf4-578b-4c02-a323-b935ed57df0d" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.037">
+    <testcase name="Sessions tutor regresa 200" time="0.037" classname="SessionsListarComoTutor"/>
+    <testcase name="Entrega arreglo de sesiones" time="0.037" classname="SessionsListarComoTutor"/>
+  </testsuite>
+  <testsuite name="Sessions - tutor propio" id="ad0b46de-ed39-4da9-b38b-c4cabb204a53" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.032">
+    <testcase name="Sessions por tutor propio regresa 200" time="0.032" classname="SessionsTutorPropio"/>
+  </testsuite>
+  <testsuite name="Sessions - otro tutor prohibido" id="27a179dc-9e6d-4fb7-8cd7-8632ac2e7724" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="Sessions de otro tutor regresa 403" time="0.012" classname="SessionsOtroTutorProhibido"/>
+  </testsuite>
+  <testsuite name="Sessions - estudiante propio como student" id="2ed0e207-0e7b-45fd-a6c6-09dc8d8244db" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.014">
+    <testcase name="Sessions propias como student regresa 200" time="0.014" classname="SessionsEstudiantePropioComoStudent"/>
+    <testcase name="Entrega sesiones propias" time="0.014" classname="SessionsEstudiantePropioComoStudent"/>
+  </testsuite>
+  <testsuite name="Sessions - estudiante ajeno prohibido para tutor" id="dcb8b084-5cd6-4d50-a808-3eee5b2be56d" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Sessions ajenas para tutor regresa 403" time="0.007" classname="SessionsEstudianteAjenoProhibidoParaTutor"/>
+  </testsuite>
+  <testsuite name="Sessions - obtener sesion existente" id="bf1aae1a-3a1f-4ef6-853d-5c623b0713bc" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.016">
+    <testcase name="Sesion existente regresa 200" time="0.016" classname="SessionsObtenerSesionExistente"/>
+    <testcase name="Sesion trae estudiante relacionado" time="0.016" classname="SessionsObtenerSesionExistente"/>
+  </testsuite>
+  <testsuite name="Levels - crear con name null" id="f0e42e63-c807-4c5f-85df-3cc61beab843" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Level con null regresa 400" time="0.007" classname="LevelsCrearConNameNull"/>
+  </testsuite>
+  <testsuite name="Levels - listar" id="c94d14d4-5879-48c4-b1dd-ef7dcbfa6397" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="Levels regresa 200" time="0.038" classname="LevelsListar"/>
+    <testcase name="Entrega niveles" time="0.038" classname="LevelsListar"/>
+  </testsuite>
+  <testsuite name="Levels - crear temporal" id="64290ef8-2189-4951-8f6c-5079cb92552f" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.147">
+    <testcase name="Crear level regresa 201" time="0.147" classname="LevelsCrearTemporal"/>
+    <testcase name="Level temporal creado" time="0.147" classname="LevelsCrearTemporal"/>
+  </testsuite>
+  <testsuite name="Levels - obtener temporal" id="d3cf9559-6ad1-483b-adaf-95e64680d984" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.022">
+    <testcase name="Level temporal regresa 200" time="0.022" classname="LevelsObtenerTemporal"/>
+    <testcase name="Level temporal correcto" time="0.022" classname="LevelsObtenerTemporal"/>
+  </testsuite>
+  <testsuite name="Levels - actualizar temporal" id="f9ea4387-4e1e-4c04-9698-7492411e63bc" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.043">
+    <testcase name="Actualizar level regresa 200" time="0.043" classname="LevelsActualizarTemporal"/>
+    <testcase name="Level temporal actualizado" time="0.043" classname="LevelsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Level Results - listar como tutor" id="ed0e08d5-7068-411c-8c17-51844d1ffd7c" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.023">
+    <testcase name="Level results tutor regresa 200" time="0.023" classname="LevelResultsListarComoTutor"/>
+    <testcase name="Entrega arreglo de resultados" time="0.023" classname="LevelResultsListarComoTutor"/>
+  </testsuite>
+  <testsuite name="Level Results - listar como student" id="56725653-ab0e-46c5-8d6d-5e93d05dcb8d" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Level results student regresa 200" time="0.009" classname="LevelResultsListarComoStudent"/>
+    <testcase name="Entrega arreglo de resultados propios" time="0.009" classname="LevelResultsListarComoStudent"/>
+  </testsuite>
+  <testsuite name="Level Results - ids de sesion propia" id="a8fd2cf9-c13a-4f1f-9da9-f99b51bc8fc3" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.056">
+    <testcase name="Ids de level results regresa 200" time="0.056" classname="LevelResultsIdsDeSesionPropia"/>
+    <testcase name="Entrega ids de resultados" time="0.056" classname="LevelResultsIdsDeSesionPropia"/>
+  </testsuite>
+  <testsuite name="Level Results - ids de sesion ajena prohibido" id="fb0f78ba-16d5-43b3-a309-9333228806a1" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.014">
+    <testcase name="Ids de sesion ajena regresa 403" time="0.014" classname="LevelResultsIdsDeSesionAjenaProhibido"/>
+  </testsuite>
+  <testsuite name="Level Results - resultado propio" id="b07d4c45-a052-459a-b075-7149b32eca16" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="Resultado propio regresa 200" time="0.010" classname="LevelResultsResultadoPropio"/>
+    <testcase name="Resultado propio correcto" time="0.010" classname="LevelResultsResultadoPropio"/>
+  </testsuite>
+  <testsuite name="Level Results - resultado ajeno prohibido" id="066d24f5-cb69-4378-be79-5f3ba4d9b5fc" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.055">
+    <testcase name="Resultado ajeno regresa 403" time="0.055" classname="LevelResultsResultadoAjenoProhibido"/>
+  </testsuite>
+  <testsuite name="Sessions - crear temporal" id="2a4bf38b-f7f8-4079-be10-d1d7d69f680e" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.017">
+    <testcase name="Crear session regresa 201" time="0.017" classname="SessionsCrearTemporal"/>
+    <testcase name="Session temporal creada" time="0.017" classname="SessionsCrearTemporal"/>
+  </testsuite>
+  <testsuite name="Sessions - obtener temporal" id="e71b710a-e8bb-4323-9b1f-d37b5b725d2f" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Session temporal regresa 200" time="0.007" classname="SessionsObtenerTemporal"/>
+    <testcase name="Session temporal correcta" time="0.007" classname="SessionsObtenerTemporal"/>
+  </testsuite>
+  <testsuite name="Sessions - actualizar temporal" id="1f9fccc0-d2aa-41e6-9c96-65c56196ce9e" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.028">
+    <testcase name="Actualizar session regresa 200" time="0.028" classname="SessionsActualizarTemporal"/>
+    <testcase name="Session temporal actualizada" time="0.028" classname="SessionsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Sessions - ids del student temporal" id="89903a57-d05f-4f9a-872b-c238697313b6" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.018">
+    <testcase name="Ids del student temporal regresa 200" time="0.018" classname="SessionsIdsDelStudentTemporal"/>
+    <testcase name="Incluye la session temporal" time="0.018" classname="SessionsIdsDelStudentTemporal"/>
+  </testsuite>
+  <testsuite name="Level Results - ids de la session temporal vacios" id="1a29c574-e89e-45d4-b1a6-567508890da6" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.024">
+    <testcase name="Ids iniciales de session temporal regresa 200" time="0.024" classname="LevelResultsIdsDeLaSessionTemporalVacios"/>
+    <testcase name="Session temporal inicia sin resultados" time="0.024" classname="LevelResultsIdsDeLaSessionTemporalVacios"/>
+  </testsuite>
+  <testsuite name="Level Results - crear temporal" id="5eb3c6c1-973c-4784-b394-899ec2d26cde" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.032">
+    <testcase name="Crear level result regresa 201" time="0.032" classname="LevelResultsCrearTemporal"/>
+    <testcase name="Level result temporal creado" time="0.032" classname="LevelResultsCrearTemporal"/>
+  </testsuite>
+  <testsuite name="Level Results - obtener temporal" id="ae01badb-d9a3-4610-ada9-31d899c163de" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Level result temporal regresa 200" time="0.007" classname="LevelResultsObtenerTemporal"/>
+    <testcase name="Level result temporal correcto" time="0.007" classname="LevelResultsObtenerTemporal"/>
+  </testsuite>
+  <testsuite name="Level Results - actualizar temporal" id="00e01db4-3a04-431c-bca8-165352389de7" timestamp="2026-06-05T17:24:22.965Z" tests="2" failures="0" errors="0" time="0.119">
+    <testcase name="Actualizar level result regresa 200" time="0.119" classname="LevelResultsActualizarTemporal"/>
+    <testcase name="Level result temporal actualizado" time="0.119" classname="LevelResultsActualizarTemporal"/>
+  </testsuite>
+  <testsuite name="Level Results - eliminar temporal" id="69e3465d-9592-402c-b1a0-ecd9dcde7a9e" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.054">
+    <testcase name="Eliminar level result regresa 200" time="0.054" classname="LevelResultsEliminarTemporal"/>
+  </testsuite>
+  <testsuite name="Sessions - eliminar temporal" id="17c3c0f1-72d1-446f-a245-177081945981" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.067">
+    <testcase name="Eliminar session regresa 200" time="0.067" classname="SessionsEliminarTemporal"/>
+  </testsuite>
+  <testsuite name="Students - eliminar temporal" id="070dd868-5a38-4e28-9e41-6a72456a3b40" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.043">
+    <testcase name="Eliminar student temporal regresa 200" time="0.043" classname="StudentsEliminarTemporal"/>
+  </testsuite>
+  <testsuite name="Levels - eliminar temporal" id="91e012fe-22d1-4a40-aa3b-c6abc3d426ec" timestamp="2026-06-05T17:24:22.965Z" tests="1" failures="0" errors="0" time="0.038">
+    <testcase name="Eliminar level regresa 200" time="0.038" classname="LevelsEliminarTemporal"/>
+  </testsuite>
+</testsuites>

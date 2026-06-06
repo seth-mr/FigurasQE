@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FQE LogsService and Rabbit Listener" tests="9" time="0.331">
+  <testsuite name="Listener Health - GET /health" id="4bad3a60-5791-400c-ba43-15616e763b6d" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.022">
+    <testcase name="Regresa 200 cuando esta sano" time="0.022" classname="ListenerHealthGetHealth"/>
+    <testcase name="Payload esperado del listener" time="0.022" classname="ListenerHealthGetHealth"/>
+  </testsuite>
+  <testsuite name="Listener Health - POST no permitido" id="de4dae56-1528-4835-8ad1-9a747573a5cb" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="Regresa 405" time="0.008" classname="ListenerHealthPostNoPermitido"/>
+    <testcase name="Mensaje de metodo no permitido" time="0.008" classname="ListenerHealthPostNoPermitido"/>
+  </testsuite>
+  <testsuite name="Listener - ruta inexistente" id="603476ed-7d82-4f35-a1fc-9cf25dda6cb9" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Regresa 404" time="0.004" classname="ListenerRutaInexistente"/>
+    <testcase name="Mensaje not found" time="0.004" classname="ListenerRutaInexistente"/>
+  </testsuite>
+  <testsuite name="Logs Health - GET /health" id="349c2eaa-4c9c-435e-b785-d8a5656bc7dd" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.017">
+    <testcase name="Regresa 200" time="0.017" classname="LogsHealthGetHealth"/>
+    <testcase name="Payload esperado de logs service" time="0.017" classname="LogsHealthGetHealth"/>
+  </testsuite>
+  <testsuite name="Logs - listado general con limit" id="2041b7f8-49c9-4f86-98a1-0f9a20878323" timestamp="2026-06-05T17:26:32.285Z" tests="3" failures="0" errors="0" time="0.012">
+    <testcase name="Regresa 200" time="0.012" classname="LogsListadoGeneralConLimit"/>
+    <testcase name="Respuesta es arreglo con maximo 3 items" time="0.012" classname="LogsListadoGeneralConLimit"/>
+    <testcase name="Cada log trae campos principales" time="0.012" classname="LogsListadoGeneralConLimit"/>
+  </testsuite>
+  <testsuite name="Logs - servicio inexistente devuelve vacio" id="d73aebc0-de41-499c-9288-21a86efb0404" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Regresa 200" time="0.007" classname="LogsServicioInexistenteDevuelveVacio"/>
+    <testcase name="Regresa arreglo vacio" time="0.007" classname="LogsServicioInexistenteDevuelveVacio"/>
+  </testsuite>
+  <testsuite name="Logs - filtro auth-service login" id="f0874b37-a5e6-4d2a-9778-105959b666da" timestamp="2026-06-05T17:26:32.285Z" tests="3" failures="0" errors="0" time="0.028">
+    <testcase name="Regresa 200" time="0.028" classname="LogsFiltroAuthServiceLogin"/>
+    <testcase name="Respuesta es arreglo" time="0.028" classname="LogsFiltroAuthServiceLogin"/>
+    <testcase name="Todos corresponden a auth-service y /auth/login" time="0.028" classname="LogsFiltroAuthServiceLogin"/>
+  </testsuite>
+  <testsuite name="Gateway trigger - register unique student" id="1a18375a-7d39-4a12-b6b3-c0fd54b1cce8" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.192">
+    <testcase name="Registro via gateway exitoso" time="0.192" classname="GatewayTriggerRegisterUniqueStudent"/>
+    <testcase name="Entrega token y role student" time="0.192" classname="GatewayTriggerRegisterUniqueStudent"/>
+  </testsuite>
+  <testsuite name="Verify listener captured auth register event" id="30caf327-5fea-4929-b5fe-2693e4b85d56" timestamp="2026-06-05T17:26:32.285Z" tests="2" failures="0" errors="0" time="0.041">
+    <testcase name="Consulta de logs responde 200" time="0.041" classname="VerifyListenerCapturedAuthRegisterEvent"/>
+    <testcase name="El listener persiste el evento en Mongo y LogsService lo expone" time="0.041" classname="VerifyListenerCapturedAuthRegisterEvent"/>
+  </testsuite>
+</testsuites>

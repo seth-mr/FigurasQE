@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FQE Gateway" tests="11" time="0.341">
+  <testsuite name="Gateway Health - local" id="a5b810e4-f20c-40c6-9ac0-4e3252ee5ffb" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.030">
+    <testcase name="Regresa 200" time="0.030" classname="GatewayHealthLocal"/>
+    <testcase name="Identifica al gateway" time="0.030" classname="GatewayHealthLocal"/>
+  </testsuite>
+  <testsuite name="Gateway Health - auth upstream" id="db6fab22-5a25-4b7f-8971-4033f82e0a2c" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.026">
+    <testcase name="Regresa 200" time="0.026" classname="GatewayHealthAuthUpstream"/>
+    <testcase name="Auth upstream esta arriba" time="0.026" classname="GatewayHealthAuthUpstream"/>
+  </testsuite>
+  <testsuite name="Gateway Health - logs upstream" id="f684836a-3adc-4425-a919-9c0f7a89e86e" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.036">
+    <testcase name="Regresa 200" time="0.036" classname="GatewayHealthLogsUpstream"/>
+    <testcase name="Logs upstream esta arriba" time="0.036" classname="GatewayHealthLogsUpstream"/>
+  </testsuite>
+  <testsuite name="Gateway Health - rabbit listener upstream" id="c9a0cda4-56d3-4a18-9471-9a47fc302c08" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.015">
+    <testcase name="Regresa 200" time="0.015" classname="GatewayHealthRabbitListenerUpstream"/>
+    <testcase name="Listener upstream esta arriba" time="0.015" classname="GatewayHealthRabbitListenerUpstream"/>
+  </testsuite>
+  <testsuite name="Gateway Health - servicio desconocido" id="a5742cec-c533-4925-8ce3-f68f800ef854" timestamp="2026-06-05T17:24:18.980Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Regresa 404" time="0.003" classname="GatewayHealthServicioDesconocido"/>
+  </testsuite>
+  <testsuite name="Gateway OpenAPI" id="51769aac-178e-456c-8737-f58302b873fb" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Regresa 200" time="0.003" classname="GatewayOpenApi"/>
+    <testcase name="Documento OpenAPI del gateway" time="0.003" classname="GatewayOpenApi"/>
+  </testsuite>
+  <testsuite name="Gateway Auth Proxy - login estudiante" id="010cda69-d388-4be0-8fea-1a2727a8ebb9" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.140">
+    <testcase name="Regresa 200" time="0.140" classname="GatewayAuthProxyLoginEstudiante"/>
+    <testcase name="Proxy auth entrega token y role student" time="0.140" classname="GatewayAuthProxyLoginEstudiante"/>
+  </testsuite>
+  <testsuite name="Gateway Data Proxy - students sin token" id="0d090d7f-4ff5-48b8-ae56-159ede7de733" timestamp="2026-06-05T17:24:18.980Z" tests="1" failures="0" errors="0" time="0.022">
+    <testcase name="Regresa 401 sin token" time="0.022" classname="GatewayDataProxyStudentsSinToken"/>
+  </testsuite>
+  <testsuite name="Gateway Logs Proxy - listado" id="62a93de4-7bf9-417c-9bbb-fac4e02b43ea" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.031">
+    <testcase name="Regresa 200" time="0.031" classname="GatewayLogsProxyListado"/>
+    <testcase name="Proxy logs entrega arreglo" time="0.031" classname="GatewayLogsProxyListado"/>
+  </testsuite>
+  <testsuite name="Gateway Logs Proxy - filtro por servicio" id="bc02e4d3-80d9-4dfc-b521-a5bb477d1579" timestamp="2026-06-05T17:24:18.980Z" tests="3" failures="0" errors="0" time="0.031">
+    <testcase name="Regresa 200" time="0.031" classname="GatewayLogsProxyFiltroPorServicio"/>
+    <testcase name="Entrega arreglo filtrado" time="0.031" classname="GatewayLogsProxyFiltroPorServicio"/>
+    <testcase name="Todos pertenecen a auth-service" time="0.031" classname="GatewayLogsProxyFiltroPorServicio"/>
+  </testsuite>
+  <testsuite name="Gateway Hands Proxy - sin imagen" id="05f47ed1-5061-4f6c-9544-bf7d0e816358" timestamp="2026-06-05T17:24:18.980Z" tests="2" failures="0" errors="0" time="0.004">
+    <testcase name="Regresa 400 cuando falta image" time="0.004" classname="GatewayHandsProxySinImagen"/>
+    <testcase name="Mensaje esperado" time="0.004" classname="GatewayHandsProxySinImagen"/>
+  </testsuite>
+</testsuites>

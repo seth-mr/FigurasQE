@@ -1,0 +1,55 @@
+{
+    "generatedAt":  "2026-06-05T11:24:32.0879518-06:00",
+    "overallPassed":  true,
+    "outputDir":  "C:\\fig\\newman\\reports\\20260605-112404",
+    "runs":  [
+                 {
+                     "name":  "auth-gateway",
+                     "passed":  true,
+                     "exitCode":  0,
+                     "requestsTotal":  13,
+                     "requestsFailed":  0,
+                     "assertionsTotal":  25,
+                     "assertionsFailed":  0,
+                     "durationMs":  2775,
+                     "jsonReport":  "auth-gateway.report.json",
+                     "junitReport":  "auth-gateway.report.xml"
+                 },
+                 {
+                     "name":  "logs-listener",
+                     "passed":  true,
+                     "exitCode":  0,
+                     "requestsTotal":  9,
+                     "requestsFailed":  0,
+                     "assertionsTotal":  20,
+                     "assertionsFailed":  0,
+                     "durationMs":  1095,
+                     "jsonReport":  "logs-listener.report.json",
+                     "junitReport":  "logs-listener.report.xml"
+                 },
+                 {
+                     "name":  "gateway",
+                     "passed":  true,
+                     "exitCode":  0,
+                     "requestsTotal":  11,
+                     "requestsFailed":  0,
+                     "assertionsTotal":  21,
+                     "assertionsFailed":  0,
+                     "durationMs":  1270,
+                     "jsonReport":  "gateway.report.json",
+                     "junitReport":  "gateway.report.xml"
+                 },
+                 {
+                     "name":  "data-service",
+                     "passed":  true,
+                     "exitCode":  0,
+                     "requestsTotal":  69,
+                     "requestsFailed":  0,
+                     "assertionsTotal":  114,
+                     "assertionsFailed":  0,
+                     "durationMs":  8969,
+                     "jsonReport":  "data-service.report.json",
+                     "junitReport":  "data-service.report.xml"
+                 }
+             ]
+}
