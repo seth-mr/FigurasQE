@@ -1,5 +1,6 @@
-const apiBaseUrl = (window.FIGURAS_API_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const apiBaseUrl = (window.FIGURAS_API_BASE_URL || "/api").replace(/\/$/, "");
 const apiRoute = `${apiBaseUrl}/hands`;
+const detectionClientId = crypto.randomUUID();
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -464,6 +465,9 @@ async function captureFrame() {
 
     const response = await fetch(apiRoute, {
         method: "POST",
+        headers: {
+            "X-Figuras-Client-Id": detectionClientId
+        },
         body: formData
     });
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { randomUUID } = require('crypto');
 
 const multer = require('multer');
 const upload = multer();
@@ -51,7 +52,7 @@ router.post('/', upload.single('image'), (req, res) => {
 
   call.write({
     image_data: imageBuffer,
-    client_id: "node-gateway"
+    client_id: req.get('x-figuras-client-id') || randomUUID()
   });
 
   call.end();

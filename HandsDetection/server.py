@@ -9,7 +9,8 @@ import mediapipe as mp
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
 from concurrent import futures
-import threading
+from contextlib import contextmanager
+from queue import Queue
 import fingers_pb2
 import fingers_pb2_grpc
 
@@ -26,16 +27,33 @@ CONNECTIONS = [
 ]
 
 def crear_detector():
-    """Cada hilo necesita su propio detector"""
     base_options = mp_python.BaseOptions(model_asset_path='hand_landmarker.task')
     options = vision.HandLandmarkerOptions(
         base_options=base_options,
         num_hands=2,
         min_hand_detection_confidence=0.7,
-        min_tracking_confidence=0.5,
-        running_mode=vision.RunningMode.VIDEO
+        running_mode=vision.RunningMode.IMAGE
     )
     return vision.HandLandmarker.create_from_options(options)
+
+class DetectorPool:
+    def __init__(self, size):
+        self.size = size
+        self.detectors = Queue(maxsize=size)
+        for _ in range(size):
+            self.detectors.put(crear_detector())
+
+    @contextmanager
+    def acquire(self):
+        detector = self.detectors.get()
+        try:
+            yield detector
+        finally:
+            self.detectors.put(detector)
+
+    @property
+    def available(self):
+        return self.detectors.qsize()
 
 def contar_dedos(landmarks, handedness, w, h):
     label = handedness[0].category_name
@@ -59,9 +77,9 @@ def contar_dedos(landmarks, handedness, w, h):
 
 class FingerDetectorServicer(fingers_pb2_grpc.FingerDetectorServicer):
     def __init__(self):
-        self.detector = crear_detector()
-        self.detector_lock = threading.Lock()
-        self.timestamp_ms = 0
+        pool_size = max(1, int(os.getenv("DETECTOR_POOL_SIZE", "4")))
+        self.detector_pool = DetectorPool(pool_size)
+        print(f"Pool de detectores listo: {pool_size}")
 
     def StreamFrames(self, request_iterator, context):
         client_id = "unknown"
@@ -81,9 +99,8 @@ class FingerDetectorServicer(fingers_pb2_grpc.FingerDetectorServicer):
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
-                with self.detector_lock:
-                    result = self.detector.detect_for_video(mp_image, self.timestamp_ms)
-                    self.timestamp_ms += 33
+                with self.detector_pool.acquire() as detector:
+                    result = detector.detect(mp_image)
 
                 left_count  = 0
                 right_count = 0

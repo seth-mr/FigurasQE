@@ -7,8 +7,8 @@ services:
       POSTGRES_DB: figurasqe
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
@@ -25,8 +25,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-seth}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-1234}
       MONGO_INITDB_DATABASE: logsdb
-    ports:
-      - "27017:27017"
+    expose:
+      - "27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -42,9 +42,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -62,15 +62,15 @@ services:
     depends_on:
       postgres-db:
         condition: service_healthy
-    ports:
-      - "5041:5041"
+    expose:
+      - "5041"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5041
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=${POSTGRES_PASSWORD:-1234}
       Jwt__Issuer: figurasqe-auth
       Jwt__Audience: figurasqe-client
-      Jwt__Secret: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+      Jwt__Secret: ${JWT_SECRET:-IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs}
       Jwt__ExpirationMinutes: 10080
       Service__Port: 5041
       Service__Endpoints__Frontend: http://frontend:8080
@@ -87,15 +87,15 @@ services:
         condition: service_healthy
       auth-service:
         condition: service_started
-    ports:
-      - "5124:5124"
+    expose:
+      - "5124"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5124
-      ConnectionStrings__PostgresConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=1234
+      ConnectionStrings__PostgresConnection: Host=postgres-db;Port=5432;Database=figurasqe;Username=postgres;Password=${POSTGRES_PASSWORD:-1234}
       Jwt__Issuer: figurasqe-auth
       Jwt__Audience: figurasqe-client
-      Jwt__Key: IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs
+      Jwt__Key: ${JWT_SECRET:-IG2xBsN8NQezECzk53BKN7TBE51Tc2LW83Fj66gntx43w8zDrs}
       Service__Port: 5124
       Service__Endpoints__AuthService: http://auth-service:5041
       Service__Endpoints__LogsService: http://logs-service:5186
@@ -109,13 +109,13 @@ services:
     depends_on:
       mongo-logs:
         condition: service_healthy
-    ports:
-      - "5186:5186"
+    expose:
+      - "5186"
     environment:
       HOST: 0.0.0.0
       PORT: 5186
       NODE_ENV: production
-      MONGO_URI: mongodb://seth:1234@mongo-logs:27017/logsdb?authSource=admin
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-seth}:${MONGO_ROOT_PASSWORD:-1234}@mongo-logs:27017/logsdb?authSource=admin
       MONGO_DATABASE: logsdb
       MONGO_COLLECTION: events
       DEFAULT_LIMIT: 200
@@ -133,20 +133,20 @@ services:
         condition: service_healthy
       mongo-logs:
         condition: service_healthy
-    ports:
-      - "5190:5190"
-      - "5191:5191"
+    expose:
+      - "5190"
+      - "5191"
     environment:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
+      RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-guest}
       RABBITMQ_VHOST: /
       RABBITMQ_QUEUE: fqe.logs
       RABBITMQ_PREFETCH: 20
       RABBITMQ_AUTO_DECLARE: "true"
       RABBITMQ_DURABLE_QUEUE: "true"
-      MONGO_CONNECTION_STRING: mongodb://seth:1234@mongo-logs:27017/logsdb?authSource=admin
+      MONGO_CONNECTION_STRING: mongodb://${MONGO_ROOT_USERNAME:-seth}:${MONGO_ROOT_PASSWORD:-1234}@mongo-logs:27017/logsdb?authSource=admin
       MONGO_DATABASE: logsdb
       MONGO_COLLECTION: events
       HEALTH_HOST: 0.0.0.0
@@ -160,9 +160,11 @@ services:
       dockerfile: Dockerfile
     container_name: fqe-hands-detection
     restart: unless-stopped
-    ports:
-      - "50051:50051"
-      - "8082:8080"
+    expose:
+      - "50051"
+      - "8080"
+    environment:
+      DETECTOR_POOL_SIZE: ${DETECTOR_POOL_SIZE:-4}
 
   gateway:
     build:
@@ -183,8 +185,8 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -194,7 +196,7 @@ services:
       FRONTEND_SERVICE: http://frontend:8080
       RABBIT_LISTENER_SERVICE: http://rabbitmongo-listener:5190
       HANDS_DETECTION_SERVICE: http://hands-detection:8080
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-guest}:${RABBITMQ_DEFAULT_PASS:-guest}@rabbitmq:5672
       RABBITMQ_QUEUE: fqe.logs
       IMPORTANT_LOG_ENABLED: "true"
       IMPORTANT_LOG_METHODS: POST,PUT,PATCH,DELETE
@@ -211,8 +213,8 @@ services:
     depends_on:
       gateway:
         condition: service_started
-    ports:
-      - "5028:8080"
+    expose:
+      - "8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
@@ -220,7 +222,40 @@ services:
       Service__Endpoints__AuthService: http://auth-service:5041
       Service__Endpoints__MicroservicioFiguras: http://microservicio-figuras:5124
       ApiGateway__InternalBaseUrl: http://gateway:3000
-      ApiGateway__PublicBaseUrl: http://localhost:3000
+      ApiGateway__PublicBaseUrl: /api
+
+  https-proxy:
+    image: caddy:2-alpine
+    container_name: figurasqe-https-proxy
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_started
+      gateway:
+        condition: service_started
+    ports:
+      - "8443:8443"
+    expose:
+      - "8088"
+    environment:
+      LAN_IP: ${LAN_IP:-127.0.0.1}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./docker-data/caddy/data:/data
+      - ./docker-data/caddy/config:/config
+
+  public-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: figurasqe-public-tunnel
+    restart: unless-stopped
+    depends_on:
+      https-proxy:
+        condition: service_started
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --url
+      - http://https-proxy:8088
 
 volumes:
   postgres_data:
